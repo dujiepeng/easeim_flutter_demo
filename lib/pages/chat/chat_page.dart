@@ -2,21 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:im_flutter_sdk/im_flutter_sdk.dart';
 
 class ChatPage extends StatefulWidget {
-  const ChatPage({
-    @required String chatId,
-    EMConversationType type = EMConversationType.Chat,
-  })  : chatId = chatId,
-        convType = type;
+  ChatPage({@required this.conv});
 
-  final String chatId;
-  final EMConversationType convType;
+  final EMConversation conv;
 
   @override
   State<StatefulWidget> createState() => _ChatPageState();
 }
 
 class _ChatPageState extends State<ChatPage> {
-  EMConversation _conv;
   @override
   void initState() {
     super.initState();
@@ -24,7 +18,7 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    print('_conv.id --- $_conv.id');
+    print('_conv.id --- $widget.conv.id');
     return Container();
   }
 }
