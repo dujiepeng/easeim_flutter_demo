@@ -11,7 +11,7 @@ class ChatPage extends StatefulWidget {
   }
 }
 
-class _ChatPageState extends State<ChatPage> {
+class _ChatPageState extends State<ChatPage> implements ChatInputBarListener {
   /// 页面所属会话
   EMConversation _conv;
 
@@ -20,6 +20,10 @@ class _ChatPageState extends State<ChatPage> {
       RefreshController(initialRefresh: false);
 
   ChatInputBar _inputBar;
+
+  bool _showMore = false;
+  bool _showRecord = false;
+  bool _showEmoji = false;
 
   /// 消息List
   List<EMMessage> _msgList;
@@ -32,7 +36,11 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    _inputBar = ChatInputBar();
+    _inputBar = ChatInputBar(
+      listener: this,
+      moreModel: _showMore,
+      voiceModel: _showRecord,
+    );
 
     _conv = ModalRoute.of(context).settings.arguments as EMConversation;
     // 设置所有消息已读
@@ -89,5 +97,49 @@ class _ChatPageState extends State<ChatPage> {
 
   _loadMoreMessages() {
     _conv.loadMessagesWithStartId(_msgList.first.msgId, 20);
+  }
+
+  @override
+  void voiceBtnDragInside() {
+    print('录音按钮内部');
+  }
+
+  @override
+  void voiceBtnDragOutside() {
+    print('录音按钮外部');
+  }
+
+  @override
+  void voiceBtnTouchDown() {
+    print('录音按钮被按下');
+  }
+
+  @override
+  void voiceBtnTouchUpInside() {
+    print('录音按钮被内部抬起');
+  }
+
+  @override
+  void voiceBtnTouchUpOutside() {
+    print('录音按钮被外部抬起');
+  }
+
+  @override
+  void emojiBtnOnTap() {
+    print('表情按钮被按下');
+  }
+
+  @override
+  void moreBtnOnTap() {
+    setState(() {
+      _showMore = !_showMore;
+    });
+  }
+
+  @override
+  void recordOrTextBtnOnTap() {
+    setState(() {
+      _showRecord = !_showRecord;
+    });
   }
 }

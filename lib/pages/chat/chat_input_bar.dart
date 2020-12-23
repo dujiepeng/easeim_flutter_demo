@@ -2,18 +2,33 @@ import 'package:easeim_flutter_demo/widgets/common_widgets.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-class ChatInputBar extends StatefulWidget {
-  @override
-  State<StatefulWidget> createState() => _ChatInputBarState();
-}
+class ChatInputBar extends StatelessWidget {
+  /// '文字输入'样式
+  ChatInputBar.inputType({
+    @required this.listener,
+    this.moreModel = false,
+  }) : voiceModel = false;
 
-class _ChatInputBarState extends State<ChatInputBar> {
+  /// '更多'样式
+  ChatInputBar.moreType({
+    @required this.listener,
+    this.voiceModel = false,
+    this.moreModel = true,
+  });
+
+  ChatInputBar({
+    @required this.listener,
+    this.voiceModel = false,
+    this.moreModel = false,
+  });
+
+  final ChatInputBarListener listener;
+
   /// 输入框Controller
   final TextEditingController _textController = new TextEditingController();
 
-  bool _voiceModel = false;
-  bool _moreModel = false;
-  bool _voiceBtnOnPressed = false;
+  final bool voiceModel;
+  final bool moreModel;
 
   @override
   Widget build(BuildContext context) {
@@ -34,13 +49,11 @@ class _ChatInputBarState extends State<ChatInputBar> {
             height: 24,
             child: FlatButton(
               padding: EdgeInsets.zero,
-              onPressed: () => {
-                setState(() {
-                  _voiceModel = !_voiceModel;
-                })
+              onPressed: () {
+                if (listener != null) listener.recordOrTextBtnOnTap();
               },
               child: Image.asset(
-                _voiceModel
+                voiceModel
                     ? 'images/chat_input_bar_voice_hidden.png'
                     : 'images/chat_input_bar_voice_show.png',
               ),
@@ -59,11 +72,9 @@ class _ChatInputBarState extends State<ChatInputBar> {
             ),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(22),
-              color: _voiceBtnOnPressed
-                  ? Color.fromRGBO(198, 198, 198, 1)
-                  : Color.fromRGBO(245, 245, 245, 1),
+              color: Color.fromRGBO(245, 245, 245, 1),
             ),
-            child: _voiceModel ? _recordButton() : _inputText(),
+            child: voiceModel ? _recordButton() : _inputText(),
           ),
         ),
         // 表情按钮
@@ -80,7 +91,7 @@ class _ChatInputBarState extends State<ChatInputBar> {
             height: 24,
             child: FlatButton(
               padding: EdgeInsets.zero,
-              onPressed: () => {print('表情')},
+              onPressed: () => _faceBtnOnTap(),
               child: Image.asset(
                 'images/chat_input_bar_emoji.png',
               ),
@@ -101,13 +112,9 @@ class _ChatInputBarState extends State<ChatInputBar> {
             height: 24,
             child: FlatButton(
               padding: EdgeInsets.zero,
-              onPressed: () => {
-                setState(() {
-                  _moreModel = !_moreModel;
-                })
-              },
+              onPressed: () => _moreBtnOnTap(),
               child: Image.asset(
-                _moreModel
+                moreModel
                     ? 'images/chat_input_bar_more_close.png'
                     : 'images/chat_input_bar_more_show.png',
               ),
@@ -126,7 +133,7 @@ class _ChatInputBarState extends State<ChatInputBar> {
       behavior: HitTestBehavior.opaque,
       child: Container(
         margin: EdgeInsets.only(
-          top: sHeight(6),
+          top: sHeight(8),
           bottom: sHeight(6),
         ),
         child: Text(
@@ -166,7 +173,7 @@ class _ChatInputBarState extends State<ChatInputBar> {
         border: InputBorder.none,
         contentPadding: EdgeInsets.fromLTRB(
           sWidth(16),
-          sHeight(6),
+          sHeight(8),
           sWidth(16),
           sHeight(6),
         ),
@@ -207,26 +214,71 @@ class _ChatInputBarState extends State<ChatInputBar> {
     }
   }
 
+  _faceBtnOnTap() {
+    if (listener != null) {
+      listener.emojiBtnOnTap();
+    }
+  }
+
+  _moreBtnOnTap() {
+    if (listener != null) {
+      listener.moreBtnOnTap();
+    }
+  }
+
   _touchDown() {
-    setState(() {
-      _voiceBtnOnPressed = true;
-    });
-    print('按下');
-  }
-
-  _dragInside() {
-    print('进入');
-  }
-
-  _dragOutside() {
-    print('超出');
+    if (listener != null) {
+      listener.voiceBtnTouchDown();
+    }
   }
 
   _touchUpInside() {
-    print('内部抬起');
+    if (listener != null) {
+      listener.voiceBtnTouchUpInside();
+    }
   }
 
   _touchUpOutside() {
-    print('外部抬起');
+    if (listener != null) {
+      listener.voiceBtnTouchUpOutside();
+    }
   }
+
+  _dragInside() {
+    if (listener != null) {
+      listener.voiceBtnDragInside();
+    }
+  }
+
+  _dragOutside() {
+    if (listener != null) {
+      listener.voiceBtnDragOutside();
+    }
+  }
+}
+
+abstract class ChatInputBarListener {
+  /// 录音/文字按钮被点击
+  void recordOrTextBtnOnTap();
+
+  /// 录音按钮按下
+  void voiceBtnTouchDown();
+
+  /// 录音按钮在内部弹起
+  void voiceBtnTouchUpInside();
+
+  /// 录音按钮在外部弹起
+  void voiceBtnTouchUpOutside();
+
+  /// 移动到录音按钮内部
+  void voiceBtnDragInside();
+
+  /// 移动到录音按钮外部
+  void voiceBtnDragOutside();
+
+  /// '表情'按钮被点击
+  void emojiBtnOnTap();
+
+  /// '更多'按钮被点击
+  void moreBtnOnTap();
 }
