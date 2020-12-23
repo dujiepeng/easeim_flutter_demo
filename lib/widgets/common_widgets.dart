@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -125,7 +123,7 @@ slidableDeleteAction({
       '删除',
       Icons.delete,
     ),
-    closeOnTap: false,
+    closeOnTap: true,
     onTap: onTap,
   );
 }
@@ -143,7 +141,7 @@ slidableNormalAction({
       label,
       icon ?? Icons.more_horiz,
     ),
-    closeOnTap: false,
+    closeOnTap: true,
     onTap: onTap,
   );
 }

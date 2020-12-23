@@ -6,37 +6,53 @@ class MePage extends StatefulWidget {
   State<StatefulWidget> createState() => MePageState();
 }
 
-class MePageState extends State<MePage> with AutomaticKeepAliveClientMixin {
-  @override
-  bool get wantKeepAlive => true;
+class MePageState extends State<MePage> {
+  double _top = 0.0; //距顶部的偏移
+  double _left = 0.0; //距左边的偏移
+  bool boolColor = false;
 
   @override
   Widget build(BuildContext context) {
-    super.build(context);
     return Scaffold(
       appBar: AppBar(
-        title: Title(
-          color: Colors.white,
-          child: Text(
-            '会话',
-          ),
-        ),
+        title: Text("DragTest"),
       ),
-      body: ListView.builder(
-        itemBuilder: (context, int index) {
-          return slidableItem(
-            margin: EdgeInsets.only(top: 10),
-            child: Container(
-              height: 60,
-              color: Colors.blue,
+      body: Stack(
+        children: <Widget>[
+          Positioned(
+            top: _top,
+            left: _left,
+            child: GestureDetector(
+              child: CircleAvatar(
+                  backgroundColor: boolColor ? Colors.red : Colors.green,
+                  child: Text("Draggable Text", textAlign: TextAlign.center),
+                  radius: 50),
+              //手指按下时会触发此回调
+              onPanDown: (DragDownDetails e) {
+                setState(() {
+                  boolColor = true;
+                });
+                //打印手指按下的位置(屏幕)
+                print("用户手指按下：${e.globalPosition}");
+              },
+              //手指滑动时会触发此回调
+              onPanUpdate: (DragUpdateDetails e) {
+                //用户手指滑动时，更新偏移，重新构建
+                setState(() {
+                  _left += e.delta.dx;
+                  _top += e.delta.dy;
+                });
+              },
+              onPanEnd: (DragEndDetails e) {
+                setState(() {
+                  boolColor = false;
+                });
+                //打印滑动结束时在x、y轴上的速度
+                print(e.velocity);
+              },
             ),
-            actions: [
-              slidableDeleteAction(),
-              slidableNormalAction(color: Colors.blue)
-            ],
-          );
-        },
-        itemCount: 10,
+          )
+        ],
       ),
     );
   }

@@ -9,9 +9,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:im_flutter_sdk/im_flutter_sdk.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+
   SystemUiOverlayStyle uiStyle = SystemUiOverlayStyle.light;
   SystemChrome.setSystemUIOverlayStyle(uiStyle);
-  WidgetsFlutterBinding.ensureInitialized();
   var options = EMOptions(appKey: 'easemob-demo#chatdemoui');
   EMClient.getInstance.init(options);
   return runApp(EaseIMDemo());
@@ -28,10 +29,10 @@ class EaseIMDemo extends StatelessWidget {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         routes: <String, WidgetBuilder>{
-          '/login': (ctx) => LoginPage(),
-          '/register': (ctx) => RegisterPage(),
-          '/home': (ctx) => HomePage(),
-          '/chat': (ctx, {arguments}) => ChatPage(chatId: arguments),
+          '/login': (context) => LoginPage(),
+          '/register': (context) => RegisterPage(),
+          '/home': (context) => HomePage(),
+          '/chat': (context, {arguments}) => ChatPage(),
         },
         theme: ThemeData(
             appBarTheme: AppBarTheme(elevation: 1),

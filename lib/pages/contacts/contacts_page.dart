@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:im_flutter_sdk/im_flutter_sdk.dart';
 
 class ContactsPage extends StatefulWidget {
@@ -96,7 +95,7 @@ class ContactsPageState extends State<ContactsPage>
       _contactList.clear();
       _contactList.addAll(contacts);
     } on EMError {
-      Fluttertoast.showToast(msg: '获取失败');
+      // Fluttertoast.showToast(msg: '获取失败');
     } finally {
       setState(() {});
     }

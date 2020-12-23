@@ -73,7 +73,7 @@ class ConversationPageState extends State<ConversationPage>
     );
   }
 
-  /// 获取会话列表
+  /// 更新会话列表
   void _reLoadAllConversations() async {
     try {
       List<EMConversation> list =
@@ -105,13 +105,18 @@ class ConversationPageState extends State<ConversationPage>
     );
   }
 
+  /// 侧滑删除按钮点击
   _deleteConversation(int index) {
     print('删除');
   }
 
+  /// 会话被点击
   _conversationItemOnPress(int index) {
     EMConversation conv = _conversationsList[index];
-    Navigator.of(context).pushNamed('/chat', arguments: conv.id);
+    Navigator.of(context).pushNamed('/chat', arguments: conv).then((value) {
+      // 返回时刷新页面
+      _reLoadAllConversations();
+    });
   }
 
   @override
