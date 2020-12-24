@@ -205,10 +205,7 @@ class _LoginPageState extends State<LoginPage> {
     String username = _usernameController.text;
     String passwd = _pwdController.text;
     try {
-      EMClient.getInstance.login(
-        username,
-        passwd,
-      );
+      await EMClient.getInstance.login(username, passwd);
       showToast('登录成功');
       Navigator.of(context).pushReplacementNamed(
         '/home',

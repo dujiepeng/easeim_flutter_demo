@@ -26,7 +26,14 @@ class ConversationPageState extends State<ConversationPage>
   @override
   void initState() {
     super.initState();
+    // 添加环信回调监听
     EMClient.getInstance.chatManager.addListener(this);
+  }
+
+  void dispose() {
+    // 移除环信回调监听
+    EMClient.getInstance.chatManager.removeListener(this);
+    super.dispose();
   }
 
   @override
@@ -106,8 +113,14 @@ class ConversationPageState extends State<ConversationPage>
   }
 
   /// 侧滑删除按钮点击
-  _deleteConversation(int index) {
-    print('删除');
+  _deleteConversation(int index) async {
+    try {
+      await EMClient.getInstance.chatManager
+          .deleteConversation(_conversationsList[index].id);
+      _conversationsList.removeAt(index);
+    } on Error {} finally {
+      setState(() {});
+    }
   }
 
   /// 会话被点击

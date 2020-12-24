@@ -161,7 +161,9 @@ class ChatInputBar extends StatelessWidget {
 
   /// 输入框
   Widget _inputText() {
-    return TextField(
+    return TextFormField(
+      textInputAction: TextInputAction.send,
+      onEditingComplete: () {},
       style: TextStyle(
         fontSize: sFontSize(14),
       ),
@@ -183,6 +185,7 @@ class ChatInputBar extends StatelessWidget {
           color: Colors.grey,
         ),
       ),
+      onFieldSubmitted: (str) => _sendBtnDidClicked(str),
     );
   }
 
@@ -255,6 +258,12 @@ class ChatInputBar extends StatelessWidget {
       listener.voiceBtnDragOutside();
     }
   }
+
+  _sendBtnDidClicked(String txt) {
+    if (listener != null && txt.length > 0) {
+      listener.sendBtnOnTap(txt);
+    }
+  }
 }
 
 abstract class ChatInputBarListener {
@@ -281,4 +290,7 @@ abstract class ChatInputBarListener {
 
   /// '更多'按钮被点击
   void moreBtnOnTap();
+
+  /// 发送按钮被点击
+  void sendBtnOnTap(String str);
 }

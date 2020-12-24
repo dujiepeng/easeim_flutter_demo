@@ -32,8 +32,8 @@ class EaseIMDemo extends StatelessWidget {
           '/login': (context) => LoginPage(),
           '/register': (context) => RegisterPage(),
           '/home': (context) => HomePage(),
-          '/chat': (context, {arguments}) => ChatPage(),
         },
+        onGenerateRoute: onGenerateRoute,
         theme: ThemeData(
             appBarTheme: AppBarTheme(elevation: 1),
             buttonTheme: ButtonThemeData(
@@ -45,5 +45,16 @@ class EaseIMDemo extends StatelessWidget {
         home: IndexPage(),
       ),
     );
+  }
+}
+
+Route<dynamic> onGenerateRoute(RouteSettings settings) {
+  String routeName = settings.name;
+  if (routeName == '/chat') {
+    return MaterialPageRoute(builder: (context) {
+      return ChatPage(settings.arguments);
+    });
+  } else {
+    return null;
   }
 }

@@ -2,23 +2,25 @@ import 'package:easeim_flutter_demo/pages/chat/chat_input_bar.dart';
 import 'package:easeim_flutter_demo/widgets/common_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:im_flutter_sdk/im_flutter_sdk.dart';
+import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
+import 'chat_items/chat_item.dart';
+
 class ChatPage extends StatefulWidget {
+  ChatPage(EMConversation conversation) : conv = conversation;
+  final EMConversation conv;
   @override
   State<StatefulWidget> createState() {
     return _ChatPageState();
   }
 }
 
-class _ChatPageState extends State<ChatPage> implements ChatInputBarListener {
-  /// 页面所属会话
-  EMConversation _conv;
-
-  /// 下拉刷新Controller
+class _ChatPageState extends State<ChatPage>
+    implements ChatInputBarListener, EMChatManagerListener {
+  final _listViewController = ScrollController();
   final RefreshController _refreshController =
       RefreshController(initialRefresh: false);
-
   ChatInputBar _inputBar;
 
   bool _showMore = false;
@@ -26,12 +28,41 @@ class _ChatPageState extends State<ChatPage> implements ChatInputBarListener {
   bool _showEmoji = false;
 
   /// 消息List
-  List<EMMessage> _msgList;
+  List<EMMessage> _msgList = List();
 
   @override
   void initState() {
     super.initState();
-    _msgList = List();
+    // 监听键盘弹起收回
+    KeyboardVisibilityNotification().addNewListener(
+      onChange: (bool visible) {
+        print(visible);
+        _moreToListViewEnd();
+      },
+    );
+
+    // 添加环信回调监听
+    EMClient.getInstance.chatManager.addListener(this);
+    // 设置所有消息已读
+    widget.conv.markAllMessagesAsRead();
+    _loadMessages(isMore: false);
+    _listViewController.addListener(() {
+      //判断是否滑动到了页面的最顶部
+      if (_listViewController.position.pixels ==
+          _listViewController.position.minScrollExtent) {
+        if (_refreshController.headerStatus == RefreshStatus.refreshing) {
+          _loadMessages(isMore: true);
+        }
+        _refreshController.refreshCompleted();
+      }
+    });
+  }
+
+  void dispose() {
+    // 移除环信回调监听
+    EMClient.getInstance.chatManager.removeListener(this);
+    _listViewController.dispose();
+    super.dispose();
   }
 
   @override
@@ -42,15 +73,12 @@ class _ChatPageState extends State<ChatPage> implements ChatInputBarListener {
       voiceModel: _showRecord,
     );
 
-    _conv = ModalRoute.of(context).settings.arguments as EMConversation;
-    // 设置所有消息已读
-    _conv.markAllMessagesAsRead();
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: Title(
           color: Colors.white,
-          child: Text(_conv.id),
+          child: Text(widget.conv.id),
         ),
       ),
       body: SafeArea(
@@ -62,14 +90,15 @@ class _ChatPageState extends State<ChatPage> implements ChatInputBarListener {
                 color: Color.fromRGBO(242, 242, 242, 1.0),
                 child: SmartRefresher(
                   enablePullDown: true,
-                  onRefresh: () => _loadMoreMessages(),
                   controller: _refreshController,
                   child: ListView.separated(
+                    physics: BouncingScrollPhysics(),
+                    controller: _listViewController,
                     itemBuilder: (_, index) {
-                      return Container();
+                      return ChatItem(_msgList[index]);
                     },
                     separatorBuilder: (_, index) {
-                      return Container();
+                      return Divider(height: 1.0);
                     },
                     itemCount: _msgList.length,
                   ),
@@ -80,6 +109,7 @@ class _ChatPageState extends State<ChatPage> implements ChatInputBarListener {
             Divider(height: 1.0),
             // 输入框
             Container(
+              // 限制输入框高度
               constraints: BoxConstraints(
                 maxHeight: sHeight(90),
                 minHeight: sHeight(44),
@@ -95,8 +125,38 @@ class _ChatPageState extends State<ChatPage> implements ChatInputBarListener {
     );
   }
 
-  _loadMoreMessages() {
-    _conv.loadMessagesWithStartId(_msgList.first.msgId, 20);
+  _loadMessages({int count = 20, bool isMore = true}) async {
+    try {
+      List<EMMessage> msg = await widget.conv.loadMessagesWithStartId(
+          _msgList.length > 0 ? _msgList.first.msgId : '', count);
+      _msgList.insertAll(0, msg);
+    } on EMError catch (e) {
+      print('load more message emErr -- ${e.description}');
+    } on Error catch (e) {
+      print('load more message err -- $e');
+    } finally {
+      if (!isMore) {
+        _moreToListViewEnd();
+      } else {
+        setState(() {});
+        _listViewController.position.moveTo(20);
+      }
+    }
+  }
+
+  _moreToListViewEnd() {
+    setState(() {});
+    Future.delayed(Duration(milliseconds: 100), () {
+      _listViewController.jumpTo(_listViewController.position.maxScrollExtent);
+    });
+  }
+
+  _sendTextMessage(String txt) async {
+    EMMessage msg =
+        EMMessage.createTxtSendMessage(username: widget.conv.id, content: txt);
+    _msgList.add(msg);
+    _moreToListViewEnd();
+    EMClient.getInstance.chatManager.sendMessage(msg);
   }
 
   @override
@@ -141,5 +201,38 @@ class _ChatPageState extends State<ChatPage> implements ChatInputBarListener {
     setState(() {
       _showRecord = !_showRecord;
     });
+  }
+
+  @override
+  void sendBtnOnTap(String str) => _sendTextMessage(str);
+
+  @override
+  onCmdMessagesReceived(List<EMMessage> messages) {
+    // TODO: implement onCmdMessagesReceived
+    throw UnimplementedError();
+  }
+
+  @override
+  onMessagesDelivered(List<EMMessage> messages) {
+    // TODO: implement onMessagesDelivered
+    throw UnimplementedError();
+  }
+
+  @override
+  onMessagesRead(List<EMMessage> messages) {
+    // TODO: implement onMessagesRead
+    throw UnimplementedError();
+  }
+
+  @override
+  onMessagesRecalled(List<EMMessage> messages) {
+    // TODO: implement onMessagesRecalled
+    throw UnimplementedError();
+  }
+
+  @override
+  onMessagesReceived(List<EMMessage> messages) {
+    _msgList.addAll(messages);
+    _moreToListViewEnd();
   }
 }
