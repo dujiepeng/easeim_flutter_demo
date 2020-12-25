@@ -68,10 +68,9 @@ class ConversationPageState extends State<ConversationPage>
           },
           separatorBuilder: (_, int index) {
             // 间隔线
-            return Container(
-              margin: EdgeInsets.only(left: sWidth(78)),
-              color: Color.fromRGBO(244, 244, 244, 1),
+            return Divider(
               height: sHeight(1),
+              color: Color.fromRGBO(244, 244, 244, 1),
             );
           },
           itemCount: _conversationsList.length,
@@ -159,4 +158,7 @@ class ConversationPageState extends State<ConversationPage>
   onMessagesReceived(List<EMMessage> messages) {
     _reLoadAllConversations();
   }
+
+  @override
+  onConversationsUpdate() {}
 }

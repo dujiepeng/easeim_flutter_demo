@@ -95,10 +95,12 @@ class _ChatPageState extends State<ChatPage>
                     physics: BouncingScrollPhysics(),
                     controller: _listViewController,
                     itemBuilder: (_, index) {
-                      return ChatItem(_msgList[index]);
+                      return _chatItemFromMessage(_msgList[index]);
                     },
                     separatorBuilder: (_, index) {
-                      return Divider(height: 1.0);
+                      return Divider(
+                        height: 50.0,
+                      );
                     },
                     itemCount: _msgList.length,
                   ),
@@ -125,11 +127,38 @@ class _ChatPageState extends State<ChatPage>
     );
   }
 
+  _chatItemFromMessage(EMMessage msg) {
+    _makeMessageAsRead(msg);
+    return ChatItem(msg, _resendMessage);
+  }
+
+  void _resendMessage(EMMessage msg) {
+    print('点击重发按钮');
+  }
+
+  _makeMessageAsRead(EMMessage msg) async {
+    if (msg.chatType == EMMessageChatType.Chat &&
+        msg.direction == EMMessageDirection.RECEIVE) {
+      if (msg.hasReadAck == false) {
+        try {
+          await EMClient.getInstance.chatManager.sendMessageReadAck(msg);
+        } on EMError {}
+      }
+      if (msg.hasRead == false) {
+        try {
+          await widget.conv.markMessageAsRead(msg.msgId);
+        } on EMError catch (e) {
+          print(e);
+        }
+      }
+    }
+  }
+
   _loadMessages({int count = 20, bool isMore = true}) async {
     try {
-      List<EMMessage> msg = await widget.conv.loadMessagesWithStartId(
+      List<EMMessage> msgs = await widget.conv.loadMessagesWithStartId(
           _msgList.length > 0 ? _msgList.first.msgId : '', count);
-      _msgList.insertAll(0, msg);
+      _msgList.insertAll(0, msgs);
     } on EMError catch (e) {
       print('load more message emErr -- ${e.description}');
     } on Error catch (e) {
@@ -207,32 +236,27 @@ class _ChatPageState extends State<ChatPage>
   void sendBtnOnTap(String str) => _sendTextMessage(str);
 
   @override
-  onCmdMessagesReceived(List<EMMessage> messages) {
-    // TODO: implement onCmdMessagesReceived
-    throw UnimplementedError();
-  }
+  onCmdMessagesReceived(List<EMMessage> messages) {}
 
   @override
-  onMessagesDelivered(List<EMMessage> messages) {
-    // TODO: implement onMessagesDelivered
-    throw UnimplementedError();
-  }
+  onMessagesDelivered(List<EMMessage> messages) {}
 
   @override
-  onMessagesRead(List<EMMessage> messages) {
-    // TODO: implement onMessagesRead
-    throw UnimplementedError();
-  }
+  onMessagesRead(List<EMMessage> messages) {}
 
   @override
-  onMessagesRecalled(List<EMMessage> messages) {
-    // TODO: implement onMessagesRecalled
-    throw UnimplementedError();
-  }
+  onMessagesRecalled(List<EMMessage> messages) {}
 
   @override
   onMessagesReceived(List<EMMessage> messages) {
-    _msgList.addAll(messages);
+    for (var msg in messages) {
+      if (msg.conversationId == widget.conv.id) {
+        _msgList.add(msg);
+      }
+    }
     _moreToListViewEnd();
   }
+
+  @override
+  onConversationsUpdate() {}
 }

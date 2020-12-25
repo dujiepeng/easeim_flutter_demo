@@ -2,12 +2,23 @@ import 'package:easeim_flutter_demo/widgets/common_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:im_flutter_sdk/im_flutter_sdk.dart';
 
-class ChatItem extends StatelessWidget {
-  const ChatItem(this.msg);
+class ChatItem extends StatefulWidget {
+  const ChatItem(
+    this.msg,
+    this.errorBtnOnTap,
+  );
   final EMMessage msg;
+  final Function(EMMessage msg) errorBtnOnTap;
+
+  @override
+  State<StatefulWidget> createState() => ChatItemState();
+}
+
+class ChatItemState extends State<ChatItem> implements EMMessageStatusListener {
   @override
   Widget build(BuildContext context) {
-    bool isRecv = msg.direction == EMMessageDirection.RECEIVE;
+    widget.msg.setMessageListener(this);
+    bool isRecv = widget.msg.direction == EMMessageDirection.RECEIVE;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -23,7 +34,7 @@ class ChatItem extends StatelessWidget {
           child: _avatarWidget(),
         ),
         _messageWidget(isRecv),
-        _messageStateWidget(),
+        _messageStateWidget(isRecv),
       ],
     );
   }
@@ -35,7 +46,7 @@ class ChatItem extends StatelessWidget {
   }
 
   _messageWidget(bool isRecv) {
-    EMMessageBody body = msg.body;
+    EMMessageBody body = widget.msg.body;
     return Container(
       constraints: BoxConstraints(
         maxWidth: sWidth(220),
@@ -50,14 +61,89 @@ class ChatItem extends StatelessWidget {
           bottomLeft: Radius.circular(10),
           bottomRight: Radius.circular(10),
         ),
-        color: Color.fromRGBO(193, 227, 252, 1),
+        color: isRecv ? Colors.white : Color.fromRGBO(193, 227, 252, 1),
       ),
       child: ChatMessageBubble(body),
     );
   }
 
-  _messageStateWidget() {
+  /// 消息状态，
+  /// 单聊发送方：消息状态和对方是否已读；
+  ///
+  /// 群聊发送方：消息状态；
+  _messageStateWidget(bool isRecv) {
+    // 发出的消息
+    if (!isRecv) {
+      // 对方已读
+      if (widget.msg.hasReadAck) {
+        return Container(
+          margin: EdgeInsets.only(
+            left: sWidth(5),
+            right: sWidth(5),
+            bottom: sWidth(10),
+            top: sWidth(10),
+          ),
+          child: Center(
+            child: Text(
+              '已读',
+              style: TextStyle(
+                color: Colors.grey,
+              ),
+            ),
+          ),
+        );
+      } else {
+        if (widget.msg.status == EMMessageStatus.PROGRESS) {
+          return Padding(
+            padding: EdgeInsets.all(sWidth(10)),
+            child: SizedBox(
+              width: sWidth(13),
+              height: sWidth(13),
+              child: CircularProgressIndicator(
+                strokeWidth: 1,
+              ),
+            ),
+          );
+        } else if (widget.msg.status == EMMessageStatus.FAIL) {
+          return IconButton(
+            padding: EdgeInsets.zero,
+            icon: Icon(
+              Icons.error,
+              color: Colors.red,
+            ),
+            onPressed: () => widget.errorBtnOnTap(widget.msg),
+          );
+        }
+      }
+    }
     return Container();
+  }
+
+  @override
+  void onDeliveryAck() {}
+
+  @override
+  void onError(EMError error) {
+    setState(() {});
+    print('发送失败');
+  }
+
+  @override
+  void onProgress(int progress) {}
+
+  @override
+  void onReadAck() {
+    setState(() {});
+    print('收到已读回调');
+  }
+
+  @override
+  void onStatusChanged() {}
+
+  @override
+  void onSuccess() {
+    setState(() {});
+    print('发送成功');
   }
 }
 
