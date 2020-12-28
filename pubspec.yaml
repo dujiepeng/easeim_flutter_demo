@@ -48,6 +48,9 @@ dependencies:
   # 常用工具类
   flustars: ^0.3.2
 
+  # 滚动列表，可以根据index滚动到指定位置
+  # scroll_to_index: ^1.0.6
+
   # 页面路由, 目前看demo跳转比较简单，可以不用。
   # fluro: ^1.7.8
   

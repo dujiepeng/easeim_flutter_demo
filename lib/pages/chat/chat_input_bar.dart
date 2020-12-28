@@ -261,6 +261,7 @@ class ChatInputBar extends StatelessWidget {
 
   _sendBtnDidClicked(String txt) {
     if (listener != null && txt.length > 0) {
+      _textController.text = '';
       listener.sendBtnOnTap(txt);
     }
   }

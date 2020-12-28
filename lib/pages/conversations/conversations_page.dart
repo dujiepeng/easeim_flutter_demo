@@ -49,31 +49,66 @@ class ConversationPageState extends State<ConversationPage>
         ),
       ),
       body: SmartRefresher(
-        header: WaterDropHeader(
-          completeDuration: Duration(milliseconds: 1000),
-          complete: Text(
-            '刷新完成',
-            style: TextStyle(color: Colors.grey),
-          ),
-          failed: Text('刷新失败'),
-        ),
         enablePullDown: true,
         onRefresh: () => _reLoadAllConversations(),
         controller: _refreshController,
-        child: ListView.separated(
-          itemBuilder: (_, int index) {
-            // 数据data
-            return conversationWidgetForIndex(index);
-            //Text('testNum --- $testNum');
-          },
-          separatorBuilder: (_, int index) {
-            // 间隔线
-            return Divider(
-              height: sHeight(1),
-              color: Color.fromRGBO(244, 244, 244, 1),
-            );
-          },
-          itemCount: _conversationsList.length,
+        child: CustomScrollView(
+          slivers: <Widget>[
+            SliverAppBar(
+              backgroundColor: Colors.transparent,
+              titleSpacing: 0,
+              floating: false,
+              centerTitle: true,
+              title: FlatButton(
+                padding: EdgeInsets.zero,
+                onPressed: () {
+                  print('search');
+                },
+                child: Container(
+                  margin: EdgeInsets.only(
+                    left: sWidth(16),
+                    right: sWidth(16),
+                  ),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(30),
+                    color: Color.fromRGBO(242, 242, 242, 1),
+                  ),
+                  height: sWidth(36),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                        width: sWidth(16),
+                      ),
+                      Icon(
+                        Icons.search,
+                        color: Color.fromRGBO(204, 204, 204, 1),
+                      ),
+                      Text(
+                        '请输入用户ID',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w300,
+                          fontSize: sFontSize(16),
+                          color: Color.fromRGBO(204, 204, 204, 1),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (
+                  BuildContext context,
+                  int index,
+                ) {
+                  return conversationWidgetForIndex(index);
+                },
+                childCount: _conversationsList.length,
+              ),
+            ),
+          ],
         ),
       ),
     );

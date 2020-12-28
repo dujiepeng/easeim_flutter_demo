@@ -167,8 +167,6 @@ class _ConversationItemState extends State<ConversationItem> {
 
   /// 消息时间
   String _latestMessageTime() {
-    return DateUtil.formatDateMs(
-      this.widget._conv.latestMessage.serverTime,
-    );
+    return timeStrByMs(this.widget._conv.latestMessage.serverTime);
   }
 }

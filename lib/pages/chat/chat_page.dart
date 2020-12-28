@@ -1,5 +1,6 @@
 import 'package:easeim_flutter_demo/pages/chat/chat_input_bar.dart';
 import 'package:easeim_flutter_demo/widgets/common_widgets.dart';
+import 'package:flustars/flustars.dart';
 import 'package:flutter/material.dart';
 import 'package:im_flutter_sdk/im_flutter_sdk.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
@@ -18,14 +19,20 @@ class ChatPage extends StatefulWidget {
 
 class _ChatPageState extends State<ChatPage>
     implements ChatInputBarListener, EMChatManagerListener {
-  final _listViewController = ScrollController();
+  final _scorllController = ScrollController();
   final RefreshController _refreshController =
-      RefreshController(initialRefresh: false);
+      RefreshController(initialRefresh: true);
+
+  /// 时间显示间隔为1分钟
+  final int _timeInterval = 60 * 1000;
+
   ChatInputBar _inputBar;
 
   bool _showMore = false;
   bool _showRecord = false;
+  bool _firstLoad = true;
   bool _showEmoji = false;
+  int _adjacentTime = 0;
 
   /// 消息List
   List<EMMessage> _msgList = List();
@@ -37,7 +44,7 @@ class _ChatPageState extends State<ChatPage>
     KeyboardVisibilityNotification().addNewListener(
       onChange: (bool visible) {
         print(visible);
-        _moreToListViewEnd();
+        _resetStateAndMoreToListViewEnd();
       },
     );
 
@@ -45,23 +52,12 @@ class _ChatPageState extends State<ChatPage>
     EMClient.getInstance.chatManager.addListener(this);
     // 设置所有消息已读
     widget.conv.markAllMessagesAsRead();
-    _loadMessages(isMore: false);
-    _listViewController.addListener(() {
-      //判断是否滑动到了页面的最顶部
-      if (_listViewController.position.pixels ==
-          _listViewController.position.minScrollExtent) {
-        if (_refreshController.headerStatus == RefreshStatus.refreshing) {
-          _loadMessages(isMore: true);
-        }
-        _refreshController.refreshCompleted();
-      }
-    });
   }
 
   void dispose() {
     // 移除环信回调监听
     EMClient.getInstance.chatManager.removeListener(this);
-    _listViewController.dispose();
+    _scorllController.dispose();
     super.dispose();
   }
 
@@ -87,22 +83,24 @@ class _ChatPageState extends State<ChatPage>
             // 消息内容
             Flexible(
               child: Container(
+                // padding: EdgeInsets.only(bottom: 20),
                 color: Color.fromRGBO(242, 242, 242, 1.0),
                 child: SmartRefresher(
                   enablePullDown: true,
+                  onRefresh: () => _loadMessages(moveBottom: _firstLoad),
                   controller: _refreshController,
-                  child: ListView.separated(
-                    physics: BouncingScrollPhysics(),
-                    controller: _listViewController,
-                    itemBuilder: (_, index) {
-                      return _chatItemFromMessage(_msgList[index]);
-                    },
-                    separatorBuilder: (_, index) {
-                      return Divider(
-                        height: 50.0,
-                      );
-                    },
-                    itemCount: _msgList.length,
+                  child: CustomScrollView(
+                    controller: _scorllController,
+                    slivers: [
+                      SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (BuildContext context, int index) {
+                            return _chatItemFromMessage(_msgList[index]);
+                          },
+                          childCount: _msgList.length,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -127,9 +125,46 @@ class _ChatPageState extends State<ChatPage>
     );
   }
 
+  /// 返回消息item，需要有高度
   _chatItemFromMessage(EMMessage msg) {
     _makeMessageAsRead(msg);
-    return ChatItem(msg, _resendMessage);
+    bool needShowTime = false;
+    if (_adjacentTime == 0 || msg.serverTime - _adjacentTime > _timeInterval) {
+      needShowTime = true;
+    }
+
+    _adjacentTime = msg.serverTime;
+
+    if (needShowTime) {
+      return Column(
+        children: [
+          Container(
+            child: Text(
+              timeStrByMs(msg.serverTime, showTime: true),
+              style: TextStyle(color: Colors.grey),
+            ),
+          ),
+          Container(
+            constraints: BoxConstraints(
+              minWidth: double.infinity,
+            ),
+            child: ChatItem(msg, _resendMessage),
+            margin: EdgeInsets.only(
+              top: sHeight(20),
+              bottom: sHeight(20),
+            ),
+          )
+        ],
+      );
+    } else {
+      return Container(
+        child: ChatItem(msg, _resendMessage),
+        margin: EdgeInsets.only(
+          top: sHeight(20),
+          bottom: sHeight(20),
+        ),
+      );
+    }
   }
 
   void _resendMessage(EMMessage msg) {
@@ -154,7 +189,11 @@ class _ChatPageState extends State<ChatPage>
     }
   }
 
-  _loadMessages({int count = 20, bool isMore = true}) async {
+  _loadMessages({int count = 20, bool moveBottom = true}) async {
+    _firstLoad = false;
+    if (_refreshController.isRefresh == false) {
+      return;
+    }
     try {
       List<EMMessage> msgs = await widget.conv.loadMessagesWithStartId(
           _msgList.length > 0 ? _msgList.first.msgId : '', count);
@@ -164,19 +203,20 @@ class _ChatPageState extends State<ChatPage>
     } on Error catch (e) {
       print('load more message err -- $e');
     } finally {
-      if (!isMore) {
-        _moreToListViewEnd();
+      _refreshController.refreshCompleted();
+
+      if (moveBottom) {
+        _resetStateAndMoreToListViewEnd();
       } else {
         setState(() {});
-        _listViewController.position.moveTo(20);
       }
     }
   }
 
-  _moreToListViewEnd() {
+  _resetStateAndMoreToListViewEnd() {
     setState(() {});
     Future.delayed(Duration(milliseconds: 100), () {
-      _listViewController.jumpTo(_listViewController.position.maxScrollExtent);
+      _scorllController.jumpTo(_scorllController.position.maxScrollExtent);
     });
   }
 
@@ -184,7 +224,7 @@ class _ChatPageState extends State<ChatPage>
     EMMessage msg =
         EMMessage.createTxtSendMessage(username: widget.conv.id, content: txt);
     _msgList.add(msg);
-    _moreToListViewEnd();
+    _resetStateAndMoreToListViewEnd();
     EMClient.getInstance.chatManager.sendMessage(msg);
   }
 
@@ -254,7 +294,7 @@ class _ChatPageState extends State<ChatPage>
         _msgList.add(msg);
       }
     }
-    _moreToListViewEnd();
+    _resetStateAndMoreToListViewEnd();
   }
 
   @override
