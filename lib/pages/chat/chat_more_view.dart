@@ -1,83 +1,117 @@
+import 'dart:math';
+
 import 'package:easeim_flutter_demo/widgets/common_widgets.dart';
 import 'package:flutter/material.dart';
 
-class ChatMoreView extends StatelessWidget {
+class ChatMoreView extends StatefulWidget {
   ChatMoreView(
     this.list, {
     int rowCount = 4,
     int columnCount = 2,
     bool autoHeight = true,
-  })  : _rowCount = rowCount,
-        _columnCount = columnCount,
-        _autoHeight = autoHeight;
+  })  : rowCount = rowCount,
+        columnCount = columnCount,
+        autoHeight = autoHeight;
 
   final List<ChatMoreViewItem> list;
 
   /// 横向总间隔
-  final double _allHorizontalPadding = sWidth(10);
+  final double allHorizontalPadding = sWidth(10);
 
   /// 纵向总间距
-  final double _allVerticalPadding = sHeight(10);
+  final double allVerticalPadding = sHeight(10);
 
   /// 列数
-  final int _rowCount;
+  final int rowCount;
 
   /// 行数
-  final int _columnCount;
+  final int columnCount;
 
   /// 每个item高度
-  final double _itemHeight = sHeight(67);
+  final double itemHeight = sWidth(67);
 
   /// 当设置的item个数不满足行数的时候，自动适应高度
-  final bool _autoHeight;
+  final bool autoHeight;
+
+  @override
+  State<StatefulWidget> createState() => _ChatMoreViewState();
+}
+
+class _ChatMoreViewState extends State<ChatMoreView> {
+  int _pageNum = 1;
+
+  List<List<ChatMoreViewItem>> _lists = [];
+
+  @override
+  void initState() {
+    super.initState();
+    num pageItemCount = widget.rowCount * widget.columnCount;
+
+    _pageNum = widget.list.length ~/ (widget.rowCount * widget.columnCount) + 1;
+    for (var i = 0; i < _pageNum; i++) {
+      int count = widget.list.length - (i + 1) * pageItemCount;
+      List<ChatMoreViewItem> list;
+      if (count >= 0) {
+        list = widget.list.sublist(i * pageItemCount, pageItemCount);
+      } else {
+        list = widget.list.sublist(i * pageItemCount);
+      }
+
+      _lists.add(list);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    double cellWidth =
-        ((MediaQuery.of(context).size.width - _allHorizontalPadding) /
-            _rowCount);
+    double width =
+        ((MediaQuery.of(context).size.width - widget.allHorizontalPadding) /
+            widget.rowCount);
     double height = 0;
-    if (_autoHeight) {
-      height =
-          _allVerticalPadding + ((list.length ~/ _rowCount) + 1) * _itemHeight;
+    if (widget.autoHeight && widget.list.length < widget.rowCount) {
+      height = widget.allVerticalPadding +
+          ((widget.list.length ~/ widget.rowCount) + 1) *
+              max(widget.itemHeight, width);
     } else {
-      height = _allVerticalPadding + _columnCount * _itemHeight;
+      height = widget.allVerticalPadding +
+          widget.columnCount * max(widget.itemHeight, width);
     }
 
     return Container(
       color: Color.fromRGBO(248, 248, 248, 1),
       width: MediaQuery.of(context).size.width,
       height: height,
-      child: GridView.count(
-        physics: NeverScrollableScrollPhysics(),
-        scrollDirection: Axis.vertical,
-        crossAxisSpacing: _allHorizontalPadding / (_rowCount - 1),
-        mainAxisSpacing: _allVerticalPadding,
-        //GridView内边距
-        padding: EdgeInsets.only(
-          left: sWidth(20),
-          right: sWidth(20),
-          top: sHeight(12),
-          bottom: sHeight(12),
-        ),
-        //一行的Widget数量
-        crossAxisCount: _rowCount,
-
-        //子Widget宽高比例
-        childAspectRatio: cellWidth / _itemHeight,
-        //子Widget列表
-        children: getItemWidgetList(),
+      child: PageView.builder(
+        itemCount: _pageNum,
+        itemBuilder: (BuildContext context, int index) {
+          return GridView.count(
+            physics: NeverScrollableScrollPhysics(),
+            scrollDirection: Axis.vertical,
+            crossAxisSpacing:
+                widget.allHorizontalPadding / (widget.rowCount - 1),
+            mainAxisSpacing: widget.allVerticalPadding,
+            padding: EdgeInsets.only(
+              left: sWidth(20),
+              right: sWidth(20),
+              top: sHeight(12),
+              bottom: sHeight(12),
+            ),
+            crossAxisCount: widget.rowCount,
+            childAspectRatio: width / max(widget.itemHeight, width),
+            children: getItemWidgetList(index),
+          );
+        },
       ),
     );
   }
 
-  List<Widget> getItemWidgetList() {
-    return list.map((item) => getItemWidget(item)).toList();
+  List<Widget> getItemWidgetList(int index) {
+    return _lists[index].map((item) => getItemWidget(item)).toList();
+    // return widget.list.map((item) => getItemWidget(item)).toList();
   }
 
   Widget getItemWidget(ChatMoreViewItem item) {
     return Container(
-      height: _itemHeight,
+      height: widget.itemHeight,
       // color: Colors.blue,
       child: GestureDetector(
         onTapUp: (TapUpDetails details) {

@@ -307,8 +307,16 @@ class _ChatPageState extends State<ChatPage>
   }
 
   /// 音视频按钮被点击
-  _moreCallBtnOnTap() {
-    print('_moreCallBtnOnTap');
+  _moreCallBtnOnTap() async {
+    try {
+      await EMClient.getInstance.callManager
+          .makeCall(EMCallType.Voice, widget.conv.id);
+      Navigator.of(context).pushNamed('/voicecall');
+    } on EMError catch (e) {
+      print('call error ---${e.description}');
+    } on Error catch (e) {
+      print('flutter error -- $e');
+    }
   }
 
   /// 位置按钮被点击
