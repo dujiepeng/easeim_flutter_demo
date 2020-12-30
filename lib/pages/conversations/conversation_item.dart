@@ -1,5 +1,4 @@
 import 'package:easeim_flutter_demo/widgets/common_widgets.dart';
-import 'package:flustars/flustars.dart';
 import 'package:flutter/material.dart';
 import 'package:im_flutter_sdk/im_flutter_sdk.dart';
 

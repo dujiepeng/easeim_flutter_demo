@@ -60,6 +60,12 @@ dependencies:
 
   # 监听键盘弹起
   keyboard_visibility: ^0.5.6
+
+  # 图片选择
+  image_picker: ^0.6.7+17
+
+  # 权限管理
+  permission_handler: ^5.0.1+1
   
   # 环信 sdk
   im_flutter_sdk:  
@@ -113,6 +119,8 @@ flutter:
     - images/chat_input_more_loc.png
     - images/chat_input_more_photo.png
     - images/chat_input_more_video.png
+    - images/chat_input_more_pin.png
+    
     - images/contact_default_avatar.png
     
     

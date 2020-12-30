@@ -53,7 +53,8 @@ class ContactsPageState extends State<ContactsPage>
 
   Widget getContactRow(int index) {
     return GestureDetector(
-      onTap: () {},
+      behavior: HitTestBehavior.opaque,
+      onTap: () => _contactDidSelected(_contactList[index]),
       child: SafeArea(
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -86,6 +87,12 @@ class ContactsPageState extends State<ContactsPage>
         ),
       ),
     );
+  }
+
+  _contactDidSelected(EMContact contact) async {
+    EMConversation conv =
+        await EMClient.getInstance.chatManager.getConversation(contact.eid);
+    Navigator.of(context).pushNamed('/chat', arguments: conv).then((value) {});
   }
 
   Future<Null> fetchContactsFromServer() async {

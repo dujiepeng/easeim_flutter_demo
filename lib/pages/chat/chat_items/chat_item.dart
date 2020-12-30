@@ -3,12 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:im_flutter_sdk/im_flutter_sdk.dart';
 
 class ChatItem extends StatefulWidget {
-  const ChatItem(
-    this.msg,
-    this.errorBtnOnTap,
-  );
+  const ChatItem(this.msg, this.errorBtnOnTap, {this.avatarOnTap});
   final EMMessage msg;
+
+  /// 重发按钮点击
   final Function(EMMessage msg) errorBtnOnTap;
+
+  /// 头像按钮点击
+  final Function(String eid) avatarOnTap;
 
   @override
   State<StatefulWidget> createState() => ChatItemState();
@@ -40,8 +42,16 @@ class ChatItemState extends State<ChatItem> implements EMMessageStatusListener {
   }
 
   _avatarWidget() {
-    return Image.asset(
-      'images/contact_default_avatar.png',
+    return FlatButton(
+      padding: EdgeInsets.zero,
+      onPressed: () {
+        if (widget.avatarOnTap != null) {
+          widget.avatarOnTap(widget.msg.from);
+        }
+      },
+      child: Image.asset(
+        'images/contact_default_avatar.png',
+      ),
     );
   }
 
@@ -106,13 +116,16 @@ class ChatItemState extends State<ChatItem> implements EMMessageStatusListener {
           );
         } else if (widget.msg.status == EMMessageStatus.FAIL) {
           return IconButton(
-            padding: EdgeInsets.zero,
-            icon: Icon(
-              Icons.error,
-              color: Colors.red,
-            ),
-            onPressed: () => widget.errorBtnOnTap(widget.msg),
-          );
+              padding: EdgeInsets.zero,
+              icon: Icon(
+                Icons.error,
+                color: Colors.red,
+              ),
+              onPressed: () {
+                if (widget.errorBtnOnTap != null) {
+                  widget.errorBtnOnTap(widget.msg);
+                }
+              });
         }
       }
     }
