@@ -9,13 +9,6 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'chat_items/chat_item.dart';
 import 'chat_more_view.dart';
 
-enum KeyboardState {
-  normal,
-  input,
-  emoji,
-  more,
-}
-
 class ChatPage extends StatefulWidget {
   ChatPage(EMConversation conversation) : conv = conversation;
   final EMConversation conv;
@@ -37,13 +30,9 @@ class _ChatPageState extends State<ChatPage>
   final int _timeInterval = 60 * 1000;
 
   ChatInputBar _inputBar;
-
-  bool _showMore = false;
-  bool _showRecord = false;
-  bool _firstLoad = true;
-  bool _showEmoji = false;
   int _adjacentTime = 0;
-  KeyboardState _keyboardState = KeyboardState.normal;
+  bool _firstLoad = true;
+  ChatInputBarType _inputBarType = ChatInputBarType.normal;
 
   /// 消息List
   List<EMMessage> _msgList = List();
@@ -91,8 +80,7 @@ class _ChatPageState extends State<ChatPage>
   Widget build(BuildContext context) {
     _inputBar = ChatInputBar(
       listener: this,
-      moreModel: _showMore,
-      voiceModel: _showRecord,
+      barType: _inputBarType,
     );
 
     return Scaffold(
@@ -223,10 +211,11 @@ class _ChatPageState extends State<ChatPage>
 
   /// 输入框下部分View
   _bottomWidget() {
-    if (_keyboardState == KeyboardState.more) return _moreWidget();
-    if (_keyboardState == KeyboardState.emoji)
+    if (_inputBarType == ChatInputBarType.more) {
+      return _moreWidget();
+    } else if (_inputBarType == ChatInputBarType.emoji) {
       return _faceWidget();
-    else {
+    } else {
       return Container();
     }
   }
@@ -366,32 +355,39 @@ class _ChatPageState extends State<ChatPage>
 
   @override
   void emojiBtnOnTap() {
-    if (_keyboardState == KeyboardState.emoji) {
-      _keyboardState = KeyboardState.input;
+    if (_inputBarType == ChatInputBarType.emoji) {
+      _inputBarType = ChatInputBarType.input;
     } else {
-      _keyboardState = KeyboardState.emoji;
+      _inputBarType = ChatInputBarType.emoji;
     }
+
     _setStateAndMoreToListViewEnd();
   }
 
   @override
   void moreBtnOnTap() {
-    if (_keyboardState == KeyboardState.more) {
-      _keyboardState = KeyboardState.input;
+    if (_inputBarType == ChatInputBarType.more) {
+      _inputBarType = ChatInputBarType.input;
     } else {
-      _keyboardState = KeyboardState.more;
+      _inputBarType = ChatInputBarType.more;
     }
     _setStateAndMoreToListViewEnd();
   }
 
   @override
-  void recordOrTextBtnOnTap() {
-    if (_keyboardState == KeyboardState.normal) {
-      _keyboardState = KeyboardState.input;
+  void textFieldOnTap() {
+    _inputBarType = ChatInputBarType.input;
+    _setStateAndMoreToListViewEnd();
+  }
+
+  @override
+  void recordOrTextBtnOnTap({bool isRecord = false}) {
+    if (_inputBarType == ChatInputBarType.normal) {
+      _inputBarType = ChatInputBarType.input;
     } else {
-      _keyboardState = KeyboardState.normal;
+      _inputBarType = ChatInputBarType.normal;
     }
-    _showRecord = !_showRecord;
+
     _setStateAndMoreToListViewEnd();
   }
 

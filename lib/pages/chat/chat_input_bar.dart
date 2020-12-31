@@ -2,36 +2,64 @@ import 'package:easeim_flutter_demo/widgets/common_widgets.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-class ChatInputBar extends StatelessWidget {
+enum ChatInputBarType {
+  // 无焦点，显示输入
+  normal,
+  // 有焦点，显示输入
+  input,
+  // 无焦点，显示表情
+  emoji,
+  // 无焦点，显示更多
+  more,
+}
+
+class ChatInputBar extends StatefulWidget {
   /// '文字输入'样式
-  ChatInputBar.inputType({
-    @required this.listener,
-    this.moreModel = false,
-  }) : voiceModel = false;
-
-  /// '更多'样式
-  ChatInputBar.moreType({
-    @required this.listener,
-    this.voiceModel = false,
-    this.moreModel = true,
-  });
-
   ChatInputBar({
     @required this.listener,
-    this.voiceModel = false,
-    this.moreModel = false,
+    this.barType = ChatInputBarType.normal,
   });
 
+  final ChatInputBarType barType;
   final ChatInputBarListener listener;
+  @override
+  State<StatefulWidget> createState() => _ChatInputBarState();
+}
+
+class _ChatInputBarState extends State<ChatInputBar> {
+  /// 焦点管理
+  FocusNode _inputFocusNode = FocusNode();
+
+  bool _showVoiceBtn = false;
 
   /// 输入框Controller
-  final TextEditingController _textController = new TextEditingController();
+  TextEditingController _textController = new TextEditingController();
 
-  final bool voiceModel;
-  final bool moreModel;
+  @override
+  void initState() {
+    super.initState();
+    _inputFocusNode.addListener(() {
+      // 获取焦点
+      if (_inputFocusNode.hasFocus) {
+        if (widget.listener != null) {
+          widget.listener.textFieldOnTap();
+        }
+      }
+      // 失去焦点
+      else {
+        print('失去焦点');
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (widget.barType == ChatInputBarType.input) {
+      FocusScope.of(context).requestFocus(_inputFocusNode);
+    } else {
+      _inputFocusNode.unfocus();
+    }
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: <Widget>[
@@ -50,10 +78,14 @@ class ChatInputBar extends StatelessWidget {
             child: FlatButton(
               padding: EdgeInsets.zero,
               onPressed: () {
-                if (listener != null) listener.recordOrTextBtnOnTap();
+                if (widget.listener != null)
+                  widget.listener.recordOrTextBtnOnTap(isRecord: _showVoiceBtn);
+                setState(() {
+                  _showVoiceBtn = !_showVoiceBtn;
+                });
               },
               child: Image.asset(
-                voiceModel
+                _showVoiceBtn
                     ? 'images/chat_input_bar_voice_hidden.png'
                     : 'images/chat_input_bar_voice_show.png',
               ),
@@ -74,7 +106,7 @@ class ChatInputBar extends StatelessWidget {
               borderRadius: BorderRadius.circular(22),
               color: Color.fromRGBO(245, 245, 245, 1),
             ),
-            child: voiceModel ? _recordButton() : _inputText(),
+            child: _showVoiceBtn ? _recordButton() : _inputText(),
           ),
         ),
         // 表情按钮
@@ -114,7 +146,7 @@ class ChatInputBar extends StatelessWidget {
               padding: EdgeInsets.zero,
               onPressed: () => _moreBtnOnTap(),
               child: Image.asset(
-                moreModel
+                widget.barType == ChatInputBarType.more
                     ? 'images/chat_input_bar_more_close.png'
                     : 'images/chat_input_bar_more_show.png',
               ),
@@ -162,6 +194,7 @@ class ChatInputBar extends StatelessWidget {
   /// 输入框
   Widget _inputText() {
     return TextFormField(
+      focusNode: _inputFocusNode,
       textInputAction: TextInputAction.send,
       onEditingComplete: () {},
       style: TextStyle(
@@ -218,58 +251,66 @@ class ChatInputBar extends StatelessWidget {
   }
 
   _faceBtnOnTap() {
-    if (listener != null) {
-      listener.emojiBtnOnTap();
+    _showVoiceBtn = false;
+    FocusScope.of(context).requestFocus(FocusNode());
+    if (widget.listener != null) {
+      widget.listener.emojiBtnOnTap();
     }
   }
 
   _moreBtnOnTap() {
-    if (listener != null) {
-      listener.moreBtnOnTap();
+    _showVoiceBtn = false;
+    if (widget.listener != null) {
+      widget.listener.moreBtnOnTap();
     }
   }
 
   _touchDown() {
-    if (listener != null) {
-      listener.voiceBtnTouchDown();
+    if (widget.listener != null) {
+      widget.listener.voiceBtnTouchDown();
     }
   }
 
   _touchUpInside() {
-    if (listener != null) {
-      listener.voiceBtnTouchUpInside();
+    if (widget.listener != null) {
+      widget.listener.voiceBtnTouchUpInside();
     }
   }
 
   _touchUpOutside() {
-    if (listener != null) {
-      listener.voiceBtnTouchUpOutside();
+    if (widget.listener != null) {
+      widget.listener.voiceBtnTouchUpOutside();
     }
   }
 
   _dragInside() {
-    if (listener != null) {
-      listener.voiceBtnDragInside();
+    if (widget.listener != null) {
+      widget.listener.voiceBtnDragInside();
     }
   }
 
   _dragOutside() {
-    if (listener != null) {
-      listener.voiceBtnDragOutside();
+    if (widget.listener != null) {
+      widget.listener.voiceBtnDragOutside();
     }
   }
 
   _sendBtnDidClicked(String txt) {
-    if (listener != null && txt.length > 0) {
+    if (widget.listener != null && txt.length > 0) {
       _textController.text = '';
-      listener.sendBtnOnTap(txt);
+      widget.listener.sendBtnOnTap(txt);
     }
+  }
+
+  void dispose() {
+    _inputFocusNode.dispose();
+    super.dispose();
   }
 }
 
 abstract class ChatInputBarListener {
   /// 录音/文字按钮被点击
-  void recordOrTextBtnOnTap();
+  void recordOrTextBtnOnTap({bool isRecord = false});
 
   /// 录音按钮按下
   void voiceBtnTouchDown();
@@ -291,6 +332,9 @@ abstract class ChatInputBarListener {
 
   /// '更多'按钮被点击
   void moreBtnOnTap();
+
+  /// '输入框'按钮被点击
+  void textFieldOnTap();
 
   /// 发送按钮被点击
   void sendBtnOnTap(String str);

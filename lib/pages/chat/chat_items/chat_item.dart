@@ -211,9 +211,43 @@ class ChatMessageBubble extends StatelessWidget {
     );
   }
 
-  _locationBubble(EMLocationMessageBody body) {}
-  _imageBubble(EMImageMessageBody body) {}
-  _voiceBubble(EMVoiceMessageBody body) {}
-  _videoBubble(EMVideoMessageBody body) {}
-  _fileBubble(EMFileMessageBody body) {}
+  _locationBubble(EMLocationMessageBody body) {
+    return Container(
+      child: Stack(
+        children: [],
+      ),
+    );
+  }
+
+  _imageBubble(EMImageMessageBody body) {
+    return Container(
+      child: Stack(
+        children: [],
+      ),
+    );
+  }
+
+  _voiceBubble(EMVoiceMessageBody body) {
+    return Container(
+      child: Stack(
+        children: [],
+      ),
+    );
+  }
+
+  _videoBubble(EMVideoMessageBody body) {
+    return Container(
+      child: Stack(
+        children: [],
+      ),
+    );
+  }
+
+  _fileBubble(EMFileMessageBody body) {
+    return Container(
+      child: Stack(
+        children: [],
+      ),
+    );
+  }
 }
