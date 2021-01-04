@@ -50,7 +50,40 @@ class MePageState extends State<MePage> {
                 print(e.velocity);
               },
             ),
-          )
+          ),
+          Positioned(
+            bottom: 100,
+            left: 100,
+            child: Container(
+              width: 100,
+              height: 100,
+              color: Colors.red,
+              child: Image.network(
+                "https://ss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=805208618,905828614&fm=26&gp=0.jpg",
+                height: 300,
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+
+                  return Container(
+                    alignment: Alignment.center,
+                    child: CircularProgressIndicator(
+                      value: loadingProgress.expectedTotalBytes != null
+                          ? loadingProgress.cumulativeBytesLoaded /
+                              loadingProgress.expectedTotalBytes
+                          : null,
+                    ),
+                  );
+
+                  // return AnimatedOpacity(
+                  //   child: child,
+                  //   opacity: frame == null ? 0 : 1,
+                  //   duration: const Duration(seconds: 2),
+                  //   curve: Curves.easeOut,
+                  // );
+                },
+              ),
+            ),
+          ),
         ],
       ),
     );

@@ -31,6 +31,7 @@ class _ChatInputBarState extends State<ChatInputBar> {
   FocusNode _inputFocusNode = FocusNode();
 
   bool _showVoiceBtn = false;
+  bool _voiceBtnSelected = false;
 
   /// 输入框Controller
   TextEditingController _textController = new TextEditingController();
@@ -50,6 +51,12 @@ class _ChatInputBarState extends State<ChatInputBar> {
         print('失去焦点');
       }
     });
+  }
+
+  void dispose() {
+    _textController.dispose();
+    _inputFocusNode.dispose();
+    super.dispose();
   }
 
   @override
@@ -104,7 +111,9 @@ class _ChatInputBarState extends State<ChatInputBar> {
             ),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(22),
-              color: Color.fromRGBO(245, 245, 245, 1),
+              color: _showVoiceBtn && _voiceBtnSelected
+                  ? Color.fromRGBO(198, 198, 198, 1)
+                  : Color.fromRGBO(245, 245, 245, 1),
             ),
             child: _showVoiceBtn ? _recordButton() : _inputText(),
           ),
@@ -157,19 +166,21 @@ class _ChatInputBarState extends State<ChatInputBar> {
     );
   }
 
+  // 用于计算点击位置
+  GlobalKey _gestureKey = GlobalKey();
+
   /// 录音按钮
   Widget _recordButton() {
-    GlobalKey gestureKey = GlobalKey();
-    return GestureDetector(
-      key: gestureKey,
+    return Listener(
       behavior: HitTestBehavior.opaque,
       child: Container(
+        key: _gestureKey,
         margin: EdgeInsets.only(
           top: sHeight(8),
           bottom: sHeight(6),
         ),
         child: Text(
-          '按住 说话',
+          _voiceBtnSelected ? '松开发送' : '按住 说话',
           style: TextStyle(
             fontSize: sFontSize(14),
           ),
@@ -177,16 +188,18 @@ class _ChatInputBarState extends State<ChatInputBar> {
           maxLines: 1,
         ),
       ),
-      onTapDown: (TapDownDetails details) => _touchDown(),
-      onLongPressEnd: (LongPressEndDetails detail) {
-        RenderBox renderBox = gestureKey.currentContext.findRenderObject();
-        Offset offset = detail.localPosition;
-        _voiceTouchUp(renderBox.size, offset);
+      onPointerDown: (PointerDownEvent event) {
+        _touchDown();
       },
-      onLongPressMoveUpdate: (LongPressMoveUpdateDetails detail) {
-        RenderBox renderBox = gestureKey.currentContext.findRenderObject();
-        Offset offset = detail.localPosition;
+      onPointerMove: (PointerMoveEvent event) {
+        RenderBox renderBox = _gestureKey.currentContext.findRenderObject();
+        Offset offset = event.localPosition;
         _voiceDragUp(renderBox.size, offset);
+      },
+      onPointerUp: (PointerUpEvent event) {
+        RenderBox renderBox = _gestureKey.currentContext.findRenderObject();
+        Offset offset = event.localPosition;
+        _voiceTouchUp(renderBox.size, offset);
       },
     );
   }
@@ -248,10 +261,15 @@ class _ChatInputBarState extends State<ChatInputBar> {
     } else {
       _touchUpOutside();
     }
+
+    setState(() {
+      _voiceBtnSelected = false;
+    });
   }
 
   _faceBtnOnTap() {
     _showVoiceBtn = false;
+    _voiceBtnSelected = false;
     FocusScope.of(context).requestFocus(FocusNode());
     if (widget.listener != null) {
       widget.listener.emojiBtnOnTap();
@@ -260,6 +278,7 @@ class _ChatInputBarState extends State<ChatInputBar> {
 
   _moreBtnOnTap() {
     _showVoiceBtn = false;
+    _voiceBtnSelected = false;
     if (widget.listener != null) {
       widget.listener.moreBtnOnTap();
     }
@@ -269,6 +288,9 @@ class _ChatInputBarState extends State<ChatInputBar> {
     if (widget.listener != null) {
       widget.listener.voiceBtnTouchDown();
     }
+    setState(() {
+      _voiceBtnSelected = true;
+    });
   }
 
   _touchUpInside() {
@@ -300,11 +322,6 @@ class _ChatInputBarState extends State<ChatInputBar> {
       _textController.text = '';
       widget.listener.sendBtnOnTap(txt);
     }
-  }
-
-  void dispose() {
-    _inputFocusNode.dispose();
-    super.dispose();
   }
 }
 

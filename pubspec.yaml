@@ -64,6 +64,9 @@ dependencies:
   # 图片选择
   image_picker: ^0.6.7+17
 
+  # 图片选择
+  file_picker: ^2.1.4
+
   # 权限管理
   permission_handler: ^5.0.1+1
   

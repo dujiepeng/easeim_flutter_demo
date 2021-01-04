@@ -31,6 +31,7 @@ class ConversationPageState extends State<ConversationPage>
   }
 
   void dispose() {
+    _refreshController.dispose();
     // 移除环信回调监听
     EMClient.getInstance.chatManager.removeListener(this);
     super.dispose();

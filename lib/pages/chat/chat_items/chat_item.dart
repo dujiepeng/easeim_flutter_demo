@@ -1,10 +1,23 @@
+import 'package:easeim_flutter_demo/pages/chat/chat_items/chat_file_bubble.dart';
+import 'package:easeim_flutter_demo/pages/chat/chat_items/chat_image_bubble.dart';
+import 'package:easeim_flutter_demo/pages/chat/chat_items/chat_location_bubble.dart';
+import 'package:easeim_flutter_demo/pages/chat/chat_items/chat_text_bubble.dart';
+import 'package:easeim_flutter_demo/pages/chat/chat_items/chat_video_bubble.dart';
+import 'package:easeim_flutter_demo/pages/chat/chat_items/chat_voice_bubble.dart';
 import 'package:easeim_flutter_demo/widgets/common_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:im_flutter_sdk/im_flutter_sdk.dart';
 
 class ChatItem extends StatefulWidget {
-  const ChatItem(this.msg, this.errorBtnOnTap, {this.avatarOnTap});
+  const ChatItem(
+    this.msg, {
+    this.longPress,
+    this.errorBtnOnTap,
+    this.avatarOnTap,
+  });
   final EMMessage msg;
+
+  final VoidCallback longPress;
 
   /// 重发按钮点击
   final Function(EMMessage msg) errorBtnOnTap;
@@ -41,6 +54,7 @@ class ChatItemState extends State<ChatItem> implements EMMessageStatusListener {
     );
   }
 
+  /// 头像 widget
   _avatarWidget() {
     return FlatButton(
       padding: EdgeInsets.zero,
@@ -55,25 +69,33 @@ class ChatItemState extends State<ChatItem> implements EMMessageStatusListener {
     );
   }
 
+  /// 消息 widget
   _messageWidget(bool isRecv) {
     EMMessageBody body = widget.msg.body;
-    return Container(
-      constraints: BoxConstraints(
-        maxWidth: sWidth(220),
-      ),
-      margin: EdgeInsets.only(
-        top: sHeight(3),
-      ),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(!isRecv ? 10 : 0),
-          topRight: Radius.circular(isRecv ? 10 : 0),
-          bottomLeft: Radius.circular(10),
-          bottomRight: Radius.circular(10),
+    return GestureDetector(
+      onLongPress: () {
+        if (widget.longPress != null) {
+          widget.longPress();
+        }
+      },
+      child: Container(
+        constraints: BoxConstraints(
+          maxWidth: sWidth(220),
         ),
-        color: isRecv ? Colors.white : Color.fromRGBO(193, 227, 252, 1),
+        margin: EdgeInsets.only(
+          top: sHeight(3),
+        ),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(!isRecv ? 10 : 0),
+            topRight: Radius.circular(isRecv ? 10 : 0),
+            bottomLeft: Radius.circular(10),
+            bottomRight: Radius.circular(10),
+          ),
+          color: isRecv ? Colors.white : Color.fromRGBO(193, 227, 252, 1),
+        ),
+        child: ChatMessageBubble(body),
       ),
-      child: ChatMessageBubble(body),
     );
   }
 
@@ -168,86 +190,27 @@ class ChatMessageBubble extends StatelessWidget {
     Widget bubble;
     switch (body.type) {
       case EMMessageBodyType.TXT:
-        bubble = _textBubble(body);
+        bubble = ChatTextBubble(body);
         break;
       case EMMessageBodyType.LOCATION:
-        bubble = _locationBubble(body);
+        bubble = ChatLocationBubble(body);
         break;
       case EMMessageBodyType.IMAGE:
-        bubble = _imageBubble(body);
+        bubble = ChatImageBubble(body);
         break;
       case EMMessageBodyType.VOICE:
-        bubble = _voiceBubble(body);
+        bubble = ChatVoiceBubble(body);
         break;
       case EMMessageBodyType.VIDEO:
-        bubble = _videoBubble(body);
+        bubble = ChatVideoBubble(body);
         break;
       case EMMessageBodyType.FILE:
-        bubble = _fileBubble(body);
+        bubble = ChatFileBubble(body);
         break;
       case EMMessageBodyType.CMD:
       case EMMessageBodyType.CUSTOM:
         bubble = Container();
     }
     return bubble;
-  }
-
-  _textBubble(EMTextMessageBody body) {
-    return Container(
-      padding: EdgeInsets.only(
-        left: sWidth(13),
-        right: sWidth(13),
-        top: sHeight(9),
-        bottom: sHeight(9),
-      ),
-      child: Text(
-        body.content,
-        textAlign: TextAlign.left,
-        style: TextStyle(
-          color: Color.fromRGBO(51, 51, 51, 1),
-          fontSize: sFontSize(17),
-        ),
-      ),
-    );
-  }
-
-  _locationBubble(EMLocationMessageBody body) {
-    return Container(
-      child: Stack(
-        children: [],
-      ),
-    );
-  }
-
-  _imageBubble(EMImageMessageBody body) {
-    return Container(
-      child: Stack(
-        children: [],
-      ),
-    );
-  }
-
-  _voiceBubble(EMVoiceMessageBody body) {
-    return Container(
-      child: Stack(
-        children: [],
-      ),
-    );
-  }
-
-  _videoBubble(EMVideoMessageBody body) {
-    return Container(
-      child: Stack(
-        children: [],
-      ),
-    );
-  }
-
-  _fileBubble(EMFileMessageBody body) {
-    return Container(
-      child: Stack(
-        children: [],
-      ),
-    );
   }
 }
