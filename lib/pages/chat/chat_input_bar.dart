@@ -32,6 +32,7 @@ class _ChatInputBarState extends State<ChatInputBar> {
 
   bool _showVoiceBtn = false;
   bool _voiceBtnSelected = false;
+  bool _voiceMoveIn = true;
 
   /// 输入框Controller
   TextEditingController _textController = new TextEditingController();
@@ -180,7 +181,11 @@ class _ChatInputBarState extends State<ChatInputBar> {
           bottom: sHeight(6),
         ),
         child: Text(
-          _voiceBtnSelected ? '松开发送' : '按住 说话',
+          _voiceBtnSelected
+              ? _voiceMoveIn
+                  ? '松开发送'
+                  : '松开取消'
+              : '按住 说话',
           style: TextStyle(
             fontSize: sFontSize(14),
           ),
@@ -290,6 +295,7 @@ class _ChatInputBarState extends State<ChatInputBar> {
     }
     setState(() {
       _voiceBtnSelected = true;
+      _voiceMoveIn = true;
     });
   }
 
@@ -306,12 +312,14 @@ class _ChatInputBarState extends State<ChatInputBar> {
   }
 
   _dragInside() {
+    setState(() => _voiceMoveIn = true);
     if (widget.listener != null) {
       widget.listener.voiceBtnDragInside();
     }
   }
 
   _dragOutside() {
+    setState(() => _voiceMoveIn = false);
     if (widget.listener != null) {
       widget.listener.voiceBtnDragOutside();
     }
