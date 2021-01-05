@@ -291,17 +291,30 @@ class _ChatPageState extends State<ChatPage>
     });
   }
 
+  /// 发送文字消息
+  _sendTextMessage(String txt) {
+    EMMessage msg = EMMessage.createTxtSendMessage(
+      username: widget.conv.id,
+      content: txt,
+    );
+    _sendMessage(msg);
+  }
+
+  /// 发送图片消息
+  _sendImageMessage(String imagePath, [String fileName = '']) {
+    EMMessage msg = EMMessage.createImageSendMessage(
+      username: widget.conv.id,
+      filePath: imagePath,
+      displayName: fileName,
+    );
+    _sendMessage(msg);
+  }
+
+  /// 发消息方法
   _sendMessage(EMMessage msg) async {
     EMMessage message = await EMClient.getInstance.chatManager.sendMessage(msg);
     _msgList.add(message);
     _setStateAndMoreToListViewEnd();
-  }
-
-  /// 发送文字消息
-  _sendTextMessage(String txt) {
-    EMMessage msg =
-        EMMessage.createTxtSendMessage(username: widget.conv.id, content: txt);
-    _sendMessage(msg);
   }
 
   /// 相册按钮被点击
@@ -309,12 +322,13 @@ class _ChatPageState extends State<ChatPage>
     PickedFile pickedFile =
         await ImagePicker().getImage(source: ImageSource.gallery);
     if (pickedFile != null) {
-      EMMessage msg = EMMessage.createImageSendMessage(
-          username: widget.conv.id, filePath: pickedFile.path);
-      _sendMessage(msg);
+      _sendImageMessage(
+        pickedFile.path,
+      );
     }
   }
 
+  /// 拍照按钮被点击
   _moreCameraBtnOnTap() {
     print('_moreCameraBtnOnTap');
   }

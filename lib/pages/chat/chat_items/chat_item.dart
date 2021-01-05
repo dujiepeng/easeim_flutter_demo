@@ -94,7 +94,10 @@ class ChatItemState extends State<ChatItem> implements EMMessageStatusListener {
           ),
           color: isRecv ? Colors.white : Color.fromRGBO(193, 227, 252, 1),
         ),
-        child: ChatMessageBubble(body),
+        child: ChatMessageBubble(
+          body,
+          widget.msg.direction,
+        ),
       ),
     );
   }
@@ -138,16 +141,17 @@ class ChatItemState extends State<ChatItem> implements EMMessageStatusListener {
           );
         } else if (widget.msg.status == EMMessageStatus.FAIL) {
           return IconButton(
-              padding: EdgeInsets.zero,
-              icon: Icon(
-                Icons.error,
-                color: Colors.red,
-              ),
-              onPressed: () {
-                if (widget.errorBtnOnTap != null) {
-                  widget.errorBtnOnTap(widget.msg);
-                }
-              });
+            padding: EdgeInsets.zero,
+            icon: Icon(
+              Icons.error,
+              color: Colors.red,
+            ),
+            onPressed: () {
+              if (widget.errorBtnOnTap != null) {
+                widget.errorBtnOnTap(widget.msg);
+              }
+            },
+          );
         }
       }
     }
@@ -164,7 +168,9 @@ class ChatItemState extends State<ChatItem> implements EMMessageStatusListener {
   }
 
   @override
-  void onProgress(int progress) {}
+  void onProgress(int progress) {
+    print('progress --- $progress');
+  }
 
   @override
   void onReadAck() {
@@ -183,8 +189,12 @@ class ChatItemState extends State<ChatItem> implements EMMessageStatusListener {
 }
 
 class ChatMessageBubble extends StatelessWidget {
-  const ChatMessageBubble(this.body);
+  const ChatMessageBubble(
+    this.body, [
+    this.direction = EMMessageDirection.SEND,
+  ]);
   final EMMessageBody body;
+  final EMMessageDirection direction;
   @override
   Widget build(BuildContext context) {
     Widget bubble;
@@ -196,7 +206,7 @@ class ChatMessageBubble extends StatelessWidget {
         bubble = ChatLocationBubble(body);
         break;
       case EMMessageBodyType.IMAGE:
-        bubble = ChatImageBubble(body);
+        bubble = ChatImageBubble(body, direction);
         break;
       case EMMessageBodyType.VOICE:
         bubble = ChatVoiceBubble(body);
