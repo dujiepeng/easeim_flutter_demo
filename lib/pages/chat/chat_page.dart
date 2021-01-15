@@ -6,6 +6,7 @@ import 'package:im_flutter_sdk/im_flutter_sdk.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:record_amr/record_amr.dart';
 
 import 'chat_items/chat_item.dart';
 import 'chat_more_view.dart';
@@ -94,59 +95,50 @@ class _ChatPageState extends State<ChatPage>
           child: Text(widget.conv.id),
         ),
       ),
-      body: GestureDetector(
-        // 点击背景隐藏键盘
-        onTap: () {
-          _inputBarType = ChatInputBarType.normal;
-          SystemChannels.textInput.invokeMethod('TextInput.hide');
-          setState(() {});
-        },
-        child: SafeArea(
-          child: Column(
-            children: <Widget>[
-              // 消息内容
-              Flexible(
-                child: Container(
-                  // padding: EdgeInsets.only(bottom: 20),
-                  color: Color.fromRGBO(242, 242, 242, 1.0),
-                  child: SmartRefresher(
-                    enablePullDown: true,
-                    onRefresh: () => _loadMessages(moveBottom: _firstLoad),
-                    controller: _refreshController,
-                    child: CustomScrollView(
-                      controller: _scorllController,
-                      slivers: [
-                        SliverList(
-                          delegate: SliverChildBuilderDelegate(
-                            (BuildContext context, int index) {
-                              return _chatItemFromMessage(
-                                  _msgList[index], index);
-                            },
-                            childCount: _msgList.length,
-                          ),
+      body: SafeArea(
+        child: Column(
+          children: <Widget>[
+            // 消息内容
+            Flexible(
+              child: Container(
+                // padding: EdgeInsets.only(bottom: 20),
+                color: Color.fromRGBO(242, 242, 242, 1.0),
+                child: SmartRefresher(
+                  enablePullDown: true,
+                  onRefresh: () => _loadMessages(moveBottom: _firstLoad),
+                  controller: _refreshController,
+                  child: CustomScrollView(
+                    controller: _scorllController,
+                    slivers: [
+                      SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (BuildContext context, int index) {
+                            return _chatItemFromMessage(_msgList[index], index);
+                          },
+                          childCount: _msgList.length,
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ),
-              // 间隔线
-              Divider(height: 1.0),
-              // 输入框
-              Container(
-                // 限制输入框高度
-                constraints: BoxConstraints(
-                  maxHeight: sHeight(90),
-                  minHeight: sHeight(44),
-                ),
-                decoration: new BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                ),
-                child: _inputBar,
+            ),
+            // 间隔线
+            Divider(height: 1.0),
+            // 输入框
+            Container(
+              // 限制输入框高度
+              constraints: BoxConstraints(
+                maxHeight: sHeight(90),
+                minHeight: sHeight(44),
               ),
-              _bottomWidget(),
-            ],
-          ),
+              decoration: new BoxDecoration(
+                color: Theme.of(context).cardColor,
+              ),
+              child: _inputBar,
+            ),
+            _bottomWidget(),
+          ],
         ),
       ),
     );
@@ -180,12 +172,9 @@ class _ChatPageState extends State<ChatPage>
             ),
             child: ChatItem(
               msg,
-              errorBtnOnTap: _resendMessage,
-              longPress: () {
-                print(
-                  'msg --- ${msg.msgId}',
-                );
-              },
+              onTap: () => _messageBubbleOnTap(msg),
+              errorBtnOnTap: () => _resendMessage(msg),
+              longPress: () => _messageOnLongPress(msg),
             ),
             margin: EdgeInsets.only(
               top: sHeight(20),
@@ -198,7 +187,9 @@ class _ChatPageState extends State<ChatPage>
       return Container(
         child: ChatItem(
           msg,
-          errorBtnOnTap: _resendMessage,
+          onTap: () => _messageBubbleOnTap(msg),
+          errorBtnOnTap: () => _resendMessage(msg),
+          longPress: () => _messageOnLongPress(msg),
         ),
         margin: EdgeInsets.only(
           top: sHeight(20),
@@ -206,12 +197,6 @@ class _ChatPageState extends State<ChatPage>
         ),
       );
     }
-  }
-
-  /// 重发消息
-  void _resendMessage(EMMessage msg) {
-    _msgList.remove(msg);
-    _sendMessage(msg);
   }
 
   /// 发送消息已读回执
@@ -291,6 +276,45 @@ class _ChatPageState extends State<ChatPage>
     });
   }
 
+  /// 点击bubble
+  _messageBubbleOnTap(EMMessage msg) {
+    print('点击bubble msg id ---- ${msg.msgId}');
+
+    switch (msg.body.type) {
+      case EMMessageBodyType.TXT:
+        break;
+      case EMMessageBodyType.IMAGE:
+        break;
+      case EMMessageBodyType.VOICE:
+        {
+          EMVoiceMessageBody body = (msg.body as EMVoiceMessageBody);
+          RecordAmr.play(body.localPath, (path) {});
+        }
+        break;
+      case EMMessageBodyType.VIDEO:
+        break;
+      case EMMessageBodyType.LOCATION:
+        break;
+      case EMMessageBodyType.FILE:
+        break;
+      case EMMessageBodyType.CMD:
+        break;
+      case EMMessageBodyType.CUSTOM:
+        break;
+    }
+  }
+
+  /// 消息长按
+  _messageOnLongPress(EMMessage msg) {
+    print('长按 msg id ---- ${msg.msgId}');
+  }
+
+  /// 重发消息
+  void _resendMessage(EMMessage msg) {
+    _msgList.remove(msg);
+    _sendMessage(msg);
+  }
+
   /// 发送文字消息
   _sendTextMessage(String txt) {
     EMMessage msg = EMMessage.createTxtSendMessage(
@@ -352,8 +376,14 @@ class _ChatPageState extends State<ChatPage>
   }
 
   /// 文件按钮被点击
-  _moreFileBtnOnTap() {
+  _moreFileBtnOnTap() async {
     print('_moreFileBtnOnTap');
+    EMCursorResult cursorResult =
+        await EMClient.getInstance.groupManager.getPublicGroupsFromServer();
+
+    for (var group in cursorResult.data) {
+      print('group ---${(group)}');
+    }
   }
 
   /// 大头针按钮被点击
@@ -364,25 +394,37 @@ class _ChatPageState extends State<ChatPage>
   @override
   void voiceBtnDragInside() {
     print('录音按钮内部');
-    _setStateAndMoreToListViewEnd();
   }
 
   @override
   void voiceBtnDragOutside() {
     print('录音按钮外部');
-    _setStateAndMoreToListViewEnd();
   }
 
   @override
   void voiceBtnTouchDown() {
-    print('录音按钮被按下');
-    _setStateAndMoreToListViewEnd();
+    RecordAmr.startVoiceRecord((volume) {
+      print('volume -- $volume');
+    }).then((value) {
+      if (value) {
+        print('录制开始');
+      } else {
+        print('录制失败');
+      }
+    });
   }
 
   @override
   void voiceBtnTouchUpInside() {
-    print('录音按钮被内部抬起');
-    _setStateAndMoreToListViewEnd();
+    RecordAmr.stopVoiceRecord((path, duration) {
+      if (path != null && duration > 0) {
+        EMMessage msg = EMMessage.createVoiceSendMessage(
+            username: widget.conv.id, filePath: path, duration: duration);
+        _sendMessage(msg);
+      } else {
+        print('录制时间太短');
+      }
+    });
   }
 
   @override

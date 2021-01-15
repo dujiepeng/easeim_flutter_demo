@@ -1,70 +1,31 @@
 PODS:
-  - DKImagePickerController/Core (4.3.2):
-    - DKImagePickerController/ImageDataManager
-    - DKImagePickerController/Resource
-  - DKImagePickerController/ImageDataManager (4.3.2)
-  - DKImagePickerController/PhotoGallery (4.3.2):
-    - DKImagePickerController/Core
-    - DKPhotoGallery
-  - DKImagePickerController/Resource (4.3.2)
-  - DKPhotoGallery (0.0.17):
-    - DKPhotoGallery/Core (= 0.0.17)
-    - DKPhotoGallery/Model (= 0.0.17)
-    - DKPhotoGallery/Preview (= 0.0.17)
-    - DKPhotoGallery/Resource (= 0.0.17)
-    - SDWebImage
-    - SwiftyGif
-  - DKPhotoGallery/Core (0.0.17):
-    - DKPhotoGallery/Model
-    - DKPhotoGallery/Preview
-    - SDWebImage
-    - SwiftyGif
-  - DKPhotoGallery/Model (0.0.17):
-    - SDWebImage
-    - SwiftyGif
-  - DKPhotoGallery/Preview (0.0.17):
-    - DKPhotoGallery/Model
-    - DKPhotoGallery/Resource
-    - SDWebImage
-    - SwiftyGif
-  - DKPhotoGallery/Resource (0.0.17):
-    - SDWebImage
-    - SwiftyGif
-  - file_picker (0.0.1):
-    - DKImagePickerController/PhotoGallery
-    - Flutter
+  - EMVoiceConvert (0.1.0)
   - Flutter (1.0.0)
   - fluttertoast (0.0.2):
     - Flutter
     - Toast
-  - Hyphenate (3.7.2)
+  - Hyphenate (3.7.3)
   - im_flutter_sdk (0.0.1):
     - Flutter
-    - Hyphenate (~> 3.7.1)
-    - Masonry
-    - MBProgressHUD (~> 1.1.0)
+    - Hyphenate (~> 3.7.3)
   - image_picker (0.0.1):
     - Flutter
   - keyboard_visibility (0.5.0):
     - Flutter
     - Reachability
-  - Masonry (1.1.0)
-  - MBProgressHUD (1.1.0)
   - path_provider (0.0.1):
     - Flutter
   - "permission_handler (5.0.1+1)":
     - Flutter
   - Reachability (3.2)
-  - SDWebImage (5.10.2):
-    - SDWebImage/Core (= 5.10.2)
-  - SDWebImage/Core (5.10.2)
+  - record_amr (0.0.1):
+    - EMVoiceConvert
+    - Flutter
   - shared_preferences (0.0.1):
     - Flutter
-  - SwiftyGif (5.3.0)
   - Toast (4.0.0)
 
 DEPENDENCIES:
-  - file_picker (from `.symlinks/plugins/file_picker/ios`)
   - Flutter (from `Flutter`)
   - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
   - im_flutter_sdk (from `.symlinks/plugins/im_flutter_sdk/ios`)
@@ -72,23 +33,17 @@ DEPENDENCIES:
   - keyboard_visibility (from `.symlinks/plugins/keyboard_visibility/ios`)
   - path_provider (from `.symlinks/plugins/path_provider/ios`)
   - permission_handler (from `.symlinks/plugins/permission_handler/ios`)
+  - record_amr (from `.symlinks/plugins/record_amr/ios`)
   - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
 
 SPEC REPOS:
   trunk:
-    - DKImagePickerController
-    - DKPhotoGallery
+    - EMVoiceConvert
     - Hyphenate
-    - Masonry
-    - MBProgressHUD
     - Reachability
-    - SDWebImage
-    - SwiftyGif
     - Toast
 
 EXTERNAL SOURCES:
-  file_picker:
-    :path: ".symlinks/plugins/file_picker/ios"
   Flutter:
     :path: Flutter
   fluttertoast:
@@ -103,29 +58,26 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/path_provider/ios"
   permission_handler:
     :path: ".symlinks/plugins/permission_handler/ios"
+  record_amr:
+    :path: ".symlinks/plugins/record_amr/ios"
   shared_preferences:
     :path: ".symlinks/plugins/shared_preferences/ios"
 
 SPEC CHECKSUMS:
-  DKImagePickerController: b5eb7f7a388e4643264105d648d01f727110fc3d
-  DKPhotoGallery: fdfad5125a9fdda9cc57df834d49df790dbb4179
-  file_picker: 3e6c3790de664ccf9b882732d9db5eaf6b8d4eb1
+  EMVoiceConvert: 32a0eaada94d93c151a5abd53ee174cd4e63b01f
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
   fluttertoast: 6122fa75143e992b1d3470f61000f591a798cc58
-  Hyphenate: a9da397810e08c4b3173a5c8f04868165ec48b9c
-  im_flutter_sdk: 2c12d9da816271e5c03bb929d1b24c15a6f62d7d
+  Hyphenate: 753da9ba8faf8c222e09a463c99983f29f47aa13
+  im_flutter_sdk: 85398877680a154f30994475ce16324b88719c1d
   image_picker: 9c3312491f862b28d21ecd8fdf0ee14e601b3f09
   keyboard_visibility: 96a24de806fe6823c3ad956c01ba2ec6d056616f
-  Masonry: 678fab65091a9290e40e2832a55e7ab731aad201
-  MBProgressHUD: e7baa36a220447d8aeb12769bf0585582f3866d9
   path_provider: abfe2b5c733d04e238b0d8691db0cfd63a27a93c
   permission_handler: eac8e15b4a1a3fba55b761d19f3f4e6b005d15b6
   Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
-  SDWebImage: b969dcfc02c40a5da71eac0b03b8f1a0c794a86f
+  record_amr: d389f8c418472c80fe0ccd8c4c528c7bc757c9c8
   shared_preferences: af6bfa751691cdc24be3045c43ec037377ada40d
-  SwiftyGif: e466e86c660d343357ab944a819a101c4127cb40
   Toast: 91b396c56ee72a5790816f40d3a94dd357abc196
 
-PODFILE CHECKSUM: fe0e1ee7f3d1f7d00b11b474b62dd62134535aea
+PODFILE CHECKSUM: b0c49dc471fd0bfbe67e228217f136c302f6f890
 
 COCOAPODS: 1.10.0

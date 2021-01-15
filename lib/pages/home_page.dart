@@ -3,6 +3,7 @@ import 'package:easeim_flutter_demo/pages/conversations/conversations_page.dart'
 import 'package:easeim_flutter_demo/pages/me/me_page.dart';
 import 'package:easeim_flutter_demo/widgets/common_widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
@@ -19,6 +20,7 @@ class _HomePageState extends State<HomePage>
   @override
   void initState() {
     super.initState();
+    _requestPermiss();
     _convPage = ConversationPage();
     _pages = [
       _convPage,
@@ -149,6 +151,11 @@ class _HomePageState extends State<HomePage>
       children: _pages,
       index: _selectedPageIndex,
     );
+  }
+
+  /// 获取麦克风权限
+  _requestPermiss() async {
+    await Permission.microphone.request();
   }
 
   @override

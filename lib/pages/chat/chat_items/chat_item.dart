@@ -11,16 +11,21 @@ import 'package:im_flutter_sdk/im_flutter_sdk.dart';
 class ChatItem extends StatefulWidget {
   const ChatItem(
     this.msg, {
+    this.onTap,
     this.longPress,
     this.errorBtnOnTap,
     this.avatarOnTap,
   });
   final EMMessage msg;
 
+  /// 长按消息bubble
   final VoidCallback longPress;
 
+  /// 点击消息bubble
+  final VoidCallback onTap;
+
   /// 重发按钮点击
-  final Function(EMMessage msg) errorBtnOnTap;
+  final VoidCallback errorBtnOnTap;
 
   /// 头像按钮点击
   final Function(String eid) avatarOnTap;
@@ -30,9 +35,13 @@ class ChatItem extends StatefulWidget {
 }
 
 class ChatItemState extends State<ChatItem> implements EMMessageStatusListener {
+  void initState() {
+    super.initState();
+    widget.msg.setMessageListener(this);
+  }
+
   @override
   Widget build(BuildContext context) {
-    widget.msg.setMessageListener(this);
     bool isRecv = widget.msg.direction == EMMessageDirection.RECEIVE;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -72,34 +81,43 @@ class ChatItemState extends State<ChatItem> implements EMMessageStatusListener {
   /// 消息 widget
   _messageWidget(bool isRecv) {
     EMMessageBody body = widget.msg.body;
-    return GestureDetector(
-      onLongPress: () {
-        if (widget.longPress != null) {
-          widget.longPress();
-        }
-      },
-      child: Container(
-        constraints: BoxConstraints(
-          maxWidth: sWidth(220),
-        ),
-        margin: EdgeInsets.only(
-          top: sHeight(3),
-        ),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(!isRecv ? 10 : 0),
-            topRight: Radius.circular(isRecv ? 10 : 0),
-            bottomLeft: Radius.circular(10),
-            bottomRight: Radius.circular(10),
+    return Builder(builder: (context) {
+      print('手势rebuild');
+      return GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: () {
+          if (widget.onTap != null) {
+            widget.onTap();
+          }
+        },
+        onLongPress: () {
+          if (widget.longPress != null) {
+            widget.longPress();
+          }
+        },
+        child: Container(
+          constraints: BoxConstraints(
+            maxWidth: sWidth(220),
           ),
-          color: isRecv ? Colors.white : Color.fromRGBO(193, 227, 252, 1),
+          margin: EdgeInsets.only(
+            top: sHeight(3),
+          ),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(!isRecv ? 10 : 0),
+              topRight: Radius.circular(isRecv ? 10 : 0),
+              bottomLeft: Radius.circular(10),
+              bottomRight: Radius.circular(10),
+            ),
+            color: isRecv ? Colors.white : Color.fromRGBO(193, 227, 252, 1),
+          ),
+          child: ChatMessageBubble(
+            body,
+            widget.msg.direction,
+          ),
         ),
-        child: ChatMessageBubble(
-          body,
-          widget.msg.direction,
-        ),
-      ),
-    );
+      );
+    });
   }
 
   /// 消息状态，
@@ -148,7 +166,7 @@ class ChatItemState extends State<ChatItem> implements EMMessageStatusListener {
             ),
             onPressed: () {
               if (widget.errorBtnOnTap != null) {
-                widget.errorBtnOnTap(widget.msg);
+                widget.errorBtnOnTap();
               }
             },
           );
@@ -209,7 +227,7 @@ class ChatMessageBubble extends StatelessWidget {
         bubble = ChatImageBubble(body, direction);
         break;
       case EMMessageBodyType.VOICE:
-        bubble = ChatVoiceBubble(body);
+        bubble = ChatVoiceBubble(body, direction);
         break;
       case EMMessageBodyType.VIDEO:
         bubble = ChatVideoBubble(body);

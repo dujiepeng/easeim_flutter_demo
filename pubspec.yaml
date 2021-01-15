@@ -65,15 +65,24 @@ dependencies:
   image_picker: ^0.6.7+17
 
   # 图片选择
-  file_picker: ^2.1.4
+  #file_picker: ^2.1.4
 
   # 权限管理
   permission_handler: ^5.0.1+1
   
+  # 显示占位符图片
+  transparent_image: ^1.0.0
+
   # 环信 sdk
   im_flutter_sdk:  
       path: ../im_flutter_sdk
   
+  # 音频录制转换和播放
+  record_amr:  
+      git:  
+        url: https://github.com/dujiepeng/record_amr.git
+        ref: master
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -123,6 +132,9 @@ flutter:
     - images/chat_input_more_photo.png
     - images/chat_input_more_video.png
     - images/chat_input_more_pin.png
+
+    - images/chat_bubble_img_broken.png
+    - images/chat_bubble_voice_ripple.png
     
     - images/contact_default_avatar.png
     
