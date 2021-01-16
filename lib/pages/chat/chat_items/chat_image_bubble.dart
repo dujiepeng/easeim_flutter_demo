@@ -20,32 +20,41 @@ class ChatImageBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget image;
-    File file = File(body.localPath);
 
-    if (direction == EMMessageDirection.SEND && file.existsSync()) {
-      image = Image.file(
-        file,
-        fit: BoxFit.contain,
-      );
+    // 作为接收方，是有图片size的，需要先根据size缩放
+    double width = body.width;
+    double height = body.height;
+
+    if (height > width) {
+      width = maxSize / height * width;
+      height = maxSize;
     } else {
-      // 作为接收方，是有图片size的，需要先根据size缩放
-      double width = body.width;
-      double height = body.height;
-
-      if (height > width) {
-        width = maxSize / height * width;
-        height = maxSize;
-      } else {
-        height = maxSize / width * height;
-        width = maxSize;
-      }
-
-      image = FadeInImage.assetNetwork(
-        placeholder: 'images/chat_bubble_img_broken.png',
-        image: body.thumbnailRemotePath,
+      height = maxSize / width * height;
+      width = maxSize;
+    }
+    File localPath = File(body.localPath);
+    if (direction == EMMessageDirection.SEND && localPath.existsSync()) {
+      image = Image.file(
+        localPath,
+        fit: BoxFit.contain,
         width: width,
         height: height,
       );
+    } else {
+      File thumbnailLocalPath = File(body.thumbnailLocalPath);
+      if (thumbnailLocalPath.existsSync()) {
+        image = Image.file(
+          thumbnailLocalPath,
+          fit: BoxFit.contain,
+        );
+      } else {
+        image = FadeInImage.assetNetwork(
+          placeholder: 'images/chat_bubble_img_broken.png',
+          image: body.thumbnailRemotePath,
+          width: width,
+          height: height,
+        );
+      }
     }
 
     return Container(

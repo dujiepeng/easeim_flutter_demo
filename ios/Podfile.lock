@@ -1,9 +1,6 @@
 PODS:
   - EMVoiceConvert (0.1.0)
   - Flutter (1.0.0)
-  - fluttertoast (0.0.2):
-    - Flutter
-    - Toast
   - Hyphenate (3.7.3)
   - im_flutter_sdk (0.0.1):
     - Flutter
@@ -23,11 +20,9 @@ PODS:
     - Flutter
   - shared_preferences (0.0.1):
     - Flutter
-  - Toast (4.0.0)
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
-  - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
   - im_flutter_sdk (from `.symlinks/plugins/im_flutter_sdk/ios`)
   - image_picker (from `.symlinks/plugins/image_picker/ios`)
   - keyboard_visibility (from `.symlinks/plugins/keyboard_visibility/ios`)
@@ -41,13 +36,10 @@ SPEC REPOS:
     - EMVoiceConvert
     - Hyphenate
     - Reachability
-    - Toast
 
 EXTERNAL SOURCES:
   Flutter:
     :path: Flutter
-  fluttertoast:
-    :path: ".symlinks/plugins/fluttertoast/ios"
   im_flutter_sdk:
     :path: ".symlinks/plugins/im_flutter_sdk/ios"
   image_picker:
@@ -66,7 +58,6 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   EMVoiceConvert: 32a0eaada94d93c151a5abd53ee174cd4e63b01f
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
-  fluttertoast: 6122fa75143e992b1d3470f61000f591a798cc58
   Hyphenate: 753da9ba8faf8c222e09a463c99983f29f47aa13
   im_flutter_sdk: 85398877680a154f30994475ce16324b88719c1d
   image_picker: 9c3312491f862b28d21ecd8fdf0ee14e601b3f09
@@ -76,7 +67,6 @@ SPEC CHECKSUMS:
   Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
   record_amr: d389f8c418472c80fe0ccd8c4c528c7bc757c9c8
   shared_preferences: af6bfa751691cdc24be3045c43ec037377ada40d
-  Toast: 91b396c56ee72a5790816f40d3a94dd357abc196
 
 PODFILE CHECKSUM: b0c49dc471fd0bfbe67e228217f136c302f6f890
 

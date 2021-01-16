@@ -47,10 +47,6 @@ class _ChatInputBarState extends State<ChatInputBar> {
           widget.listener.textFieldOnTap();
         }
       }
-      // 失去焦点
-      else {
-        print('失去焦点');
-      }
     });
   }
 

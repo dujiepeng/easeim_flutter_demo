@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:easeim_flutter_demo/pages/chat/chat_input_bar.dart';
 import 'package:easeim_flutter_demo/widgets/common_widgets.dart';
+import 'package:easeim_flutter_demo/widgets/toast_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:im_flutter_sdk/im_flutter_sdk.dart';
@@ -35,6 +38,7 @@ class _ChatPageState extends State<ChatPage>
   ChatInputBarType _inputBarType = ChatInputBarType.normal;
 
   int _subscribeId;
+  bool _keyboardVisible = false;
 
   /// 消息List
   List<EMMessage> _msgList = List();
@@ -45,6 +49,7 @@ class _ChatPageState extends State<ChatPage>
     // 监听键盘弹起收回
     _subscribeId = KeyboardVisibilityNotification().addNewListener(
       onChange: (bool visible) {
+        _keyboardVisible = visible;
         print(visible);
         _setStateAndMoreToListViewEnd();
       },
@@ -95,50 +100,61 @@ class _ChatPageState extends State<ChatPage>
           child: Text(widget.conv.id),
         ),
       ),
-      body: SafeArea(
-        child: Column(
-          children: <Widget>[
-            // 消息内容
-            Flexible(
-              child: Container(
-                // padding: EdgeInsets.only(bottom: 20),
-                color: Color.fromRGBO(242, 242, 242, 1.0),
-                child: SmartRefresher(
-                  enablePullDown: true,
-                  onRefresh: () => _loadMessages(moveBottom: _firstLoad),
-                  controller: _refreshController,
-                  child: CustomScrollView(
-                    controller: _scorllController,
-                    slivers: [
-                      SliverList(
-                        delegate: SliverChildBuilderDelegate(
-                          (BuildContext context, int index) {
-                            return _chatItemFromMessage(_msgList[index], index);
-                          },
-                          childCount: _msgList.length,
+      body: GestureDetector(
+        // 点击背景隐藏键盘
+        onTap: () {
+          if (_keyboardVisible) {
+            _inputBarType = ChatInputBarType.normal;
+            SystemChannels.textInput.invokeMethod('TextInput.hide');
+            setState(() {});
+          }
+        },
+        child: SafeArea(
+          child: Column(
+            children: <Widget>[
+              // 消息内容
+              Flexible(
+                child: Container(
+                  // padding: EdgeInsets.only(bottom: 20),
+                  color: Color.fromRGBO(242, 242, 242, 1.0),
+                  child: SmartRefresher(
+                    enablePullDown: true,
+                    onRefresh: () => _loadMessages(moveBottom: _firstLoad),
+                    controller: _refreshController,
+                    child: CustomScrollView(
+                      controller: _scorllController,
+                      slivers: [
+                        SliverList(
+                          delegate: SliverChildBuilderDelegate(
+                            (BuildContext context, int index) {
+                              return _chatItemFromMessage(
+                                  _msgList[index], index);
+                            },
+                            childCount: _msgList.length,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-            // 间隔线
-            Divider(height: 1.0),
-            // 输入框
-            Container(
-              // 限制输入框高度
-              constraints: BoxConstraints(
-                maxHeight: sHeight(90),
-                minHeight: sHeight(44),
+              // 间隔线
+              Divider(height: 1.0),
+              // 输入框
+              Container(
+                // 限制输入框高度
+                constraints: BoxConstraints(
+                  maxHeight: sHeight(90),
+                  minHeight: sHeight(44),
+                ),
+                decoration: new BoxDecoration(
+                  color: Theme.of(context).cardColor,
+                ),
+                child: _inputBar,
               ),
-              decoration: new BoxDecoration(
-                color: Theme.of(context).cardColor,
-              ),
-              child: _inputBar,
-            ),
-            _bottomWidget(),
-          ],
+              _bottomWidget(),
+            ],
+          ),
         ),
       ),
     );
@@ -211,9 +227,7 @@ class _ChatPageState extends State<ChatPage>
       if (msg.hasRead == false) {
         try {
           await widget.conv.markMessageAsRead(msg.msgId);
-        } on EMError catch (e) {
-          print(e);
-        }
+        } on EMError {}
       }
     }
   }
@@ -253,11 +267,7 @@ class _ChatPageState extends State<ChatPage>
       List<EMMessage> msgs = await widget.conv.loadMessagesWithStartId(
           _msgList.length > 0 ? _msgList.first.msgId : '', count);
       _msgList.insertAll(0, msgs);
-    } on EMError catch (e) {
-      print('load more message emErr -- ${e.description}');
-    } on Error catch (e) {
-      print('load more message err -- $e');
-    } finally {
+    } on EMError {} on Error {} finally {
       _refreshController.refreshCompleted();
 
       if (moveBottom) {
@@ -278,8 +288,6 @@ class _ChatPageState extends State<ChatPage>
 
   /// 点击bubble
   _messageBubbleOnTap(EMMessage msg) {
-    print('点击bubble msg id ---- ${msg.msgId}');
-
     switch (msg.body.type) {
       case EMMessageBodyType.TXT:
         break;
@@ -326,12 +334,24 @@ class _ChatPageState extends State<ChatPage>
 
   /// 发送图片消息
   _sendImageMessage(String imagePath, [String fileName = '']) {
-    EMMessage msg = EMMessage.createImageSendMessage(
-      username: widget.conv.id,
-      filePath: imagePath,
-      displayName: fileName,
-    );
-    _sendMessage(msg);
+    Image.file(
+      File(imagePath),
+      fit: BoxFit.contain,
+    )
+        .image
+        .resolve(ImageConfiguration())
+        .addListener(ImageStreamListener((ImageInfo info, bool _) {
+      EMMessage msg = EMMessage.createImageSendMessage(
+        username: widget.conv.id,
+        filePath: imagePath,
+        displayName: fileName,
+      );
+      EMImageMessageBody body = msg.body;
+      body.height = info.image.height.toDouble();
+      body.width = info.image.width.toDouble();
+      msg.body = body;
+      _sendMessage(msg);
+    }));
   }
 
   /// 发消息方法
@@ -425,6 +445,8 @@ class _ChatPageState extends State<ChatPage>
         print('录制时间太短');
       }
     });
+
+    Toast.of(context).show('录音太短');
   }
 
   @override

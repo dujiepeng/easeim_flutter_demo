@@ -2,7 +2,6 @@ import 'package:flustars/flustars.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart' as screen_util;
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 /// 注册登录用的输入框
 loginRegistTextField(
@@ -202,16 +201,6 @@ unreadCoundWidget(int unreadCount) {
         color: Colors.white,
       ),
     ),
-  );
-}
-
-/// toast
-showToast(
-  String msg,
-) {
-  Fluttertoast.showToast(
-    msg: msg,
-    gravity: ToastGravity.CENTER,
   );
 }
 

@@ -81,43 +81,44 @@ class ChatItemState extends State<ChatItem> implements EMMessageStatusListener {
   /// 消息 widget
   _messageWidget(bool isRecv) {
     EMMessageBody body = widget.msg.body;
-    return Builder(builder: (context) {
-      print('手势rebuild');
-      return GestureDetector(
-        behavior: HitTestBehavior.translucent,
-        onTap: () {
-          if (widget.onTap != null) {
-            widget.onTap();
-          }
-        },
-        onLongPress: () {
-          if (widget.longPress != null) {
-            widget.longPress();
-          }
-        },
-        child: Container(
-          constraints: BoxConstraints(
-            maxWidth: sWidth(220),
-          ),
-          margin: EdgeInsets.only(
-            top: sHeight(3),
-          ),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(!isRecv ? 10 : 0),
-              topRight: Radius.circular(isRecv ? 10 : 0),
-              bottomLeft: Radius.circular(10),
-              bottomRight: Radius.circular(10),
+    return Builder(
+      builder: (context) {
+        return GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () {
+            if (widget.onTap != null) {
+              widget.onTap();
+            }
+          },
+          onLongPress: () {
+            if (widget.longPress != null) {
+              widget.longPress();
+            }
+          },
+          child: Container(
+            constraints: BoxConstraints(
+              maxWidth: sWidth(220),
             ),
-            color: isRecv ? Colors.white : Color.fromRGBO(193, 227, 252, 1),
+            margin: EdgeInsets.only(
+              top: sHeight(3),
+            ),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(!isRecv ? 10 : 0),
+                topRight: Radius.circular(isRecv ? 10 : 0),
+                bottomLeft: Radius.circular(10),
+                bottomRight: Radius.circular(10),
+              ),
+              color: isRecv ? Colors.white : Color.fromRGBO(193, 227, 252, 1),
+            ),
+            child: ChatMessageBubble(
+              body,
+              widget.msg.direction,
+            ),
           ),
-          child: ChatMessageBubble(
-            body,
-            widget.msg.direction,
-          ),
-        ),
-      );
-    });
+        );
+      },
+    );
   }
 
   /// 消息状态，

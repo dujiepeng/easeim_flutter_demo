@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:easeim_flutter_demo/widgets/common_widgets.dart';
+import 'package:easeim_flutter_demo/widgets/toast_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:im_flutter_sdk/im_flutter_sdk.dart';
 
@@ -206,12 +207,15 @@ class _LoginPageState extends State<LoginPage> {
     String passwd = _pwdController.text;
     try {
       await EMClient.getInstance.login(username, passwd);
-      showToast('登录成功');
+
       Navigator.of(context).pushReplacementNamed(
         '/home',
       );
     } on EMError {
-      showToast('登录失败');
+      Toast.of(context).show(
+        '登录失败',
+        duration: Duration(seconds: 3),
+      );
     }
   }
 
