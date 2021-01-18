@@ -445,8 +445,6 @@ class _ChatPageState extends State<ChatPage>
         print('录制时间太短');
       }
     });
-
-    Toast.of(context).show('录音太短');
   }
 
   @override
@@ -462,7 +460,6 @@ class _ChatPageState extends State<ChatPage>
     } else {
       _inputBarType = ChatInputBarType.emoji;
     }
-
     _setStateAndMoreToListViewEnd();
   }
 

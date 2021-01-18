@@ -211,9 +211,9 @@ class _LoginPageState extends State<LoginPage> {
       Navigator.of(context).pushReplacementNamed(
         '/home',
       );
-    } on EMError {
+    } on EMError catch (e) {
       Toast.of(context).show(
-        '登录失败',
+        '登录失败 $e',
         duration: Duration(seconds: 3),
       );
     }

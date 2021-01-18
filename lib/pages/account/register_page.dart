@@ -1,5 +1,7 @@
 import 'package:easeim_flutter_demo/widgets/common_widgets.dart';
+import 'package:easeim_flutter_demo/widgets/toast_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:im_flutter_sdk/im_flutter_sdk.dart';
 
 class RegisterPage extends StatefulWidget {
   @override
@@ -154,7 +156,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         loginRegisterButton(
                           enable: _agreeProtocal,
                           margin: EdgeInsets.only(left: 33, right: 33),
-                          onPressed: () {},
+                          onPressed: _doRegisterAction,
                           title: '注册',
                           beginColor: Colors.blue[400],
                           endColor: Colors.blue[800],
@@ -184,5 +186,18 @@ class _RegisterPageState extends State<RegisterPage> {
 
   hiddenKeyboard() {
     FocusScope.of(context).requestFocus(FocusNode());
+  }
+
+  _doRegisterAction() async {
+    try {
+      await EMClient.getInstance
+          .createAccount(_usernameController.text, _confPwdController.text);
+      Navigator.of(context).pushReplacementNamed('/login');
+    } on EMError catch (e) {
+      Toast.of(context).show(
+        '注册失败，$e',
+        duration: Duration(seconds: 3),
+      );
+    }
   }
 }
