@@ -4,9 +4,12 @@ import 'package:easeim_flutter_demo/pages/chat/chat_items/chat_location_bubble.d
 import 'package:easeim_flutter_demo/pages/chat/chat_items/chat_text_bubble.dart';
 import 'package:easeim_flutter_demo/pages/chat/chat_items/chat_video_bubble.dart';
 import 'package:easeim_flutter_demo/pages/chat/chat_items/chat_voice_bubble.dart';
+import 'package:easeim_flutter_demo/unit/chat_voice_player.dart';
 import 'package:easeim_flutter_demo/widgets/common_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:im_flutter_sdk/im_flutter_sdk.dart';
+import 'package:provider/provider.dart';
+import 'package:tuple/tuple.dart';
 
 class ChatItem extends StatefulWidget {
   const ChatItem(
@@ -112,6 +115,7 @@ class ChatItemState extends State<ChatItem> implements EMMessageStatusListener {
               color: isRecv ? Colors.white : Color.fromRGBO(193, 227, 252, 1),
             ),
             child: ChatMessageBubble(
+              widget.msg.msgId,
               body,
               widget.msg.direction,
             ),
@@ -209,11 +213,13 @@ class ChatItemState extends State<ChatItem> implements EMMessageStatusListener {
 
 class ChatMessageBubble extends StatelessWidget {
   const ChatMessageBubble(
+    this.msgId,
     this.body, [
     this.direction = EMMessageDirection.SEND,
   ]);
   final EMMessageBody body;
   final EMMessageDirection direction;
+  final String msgId;
   @override
   Widget build(BuildContext context) {
     Widget bubble;
@@ -228,7 +234,14 @@ class ChatMessageBubble extends StatelessWidget {
         bubble = ChatImageBubble(body, direction);
         break;
       case EMMessageBodyType.VOICE:
-        bubble = ChatVoiceBubble(body, direction);
+        bubble = Builder(builder: (context) {
+          return Selector(
+            selector: (_, ChatVoicePlayer player) =>
+                Tuple2<String, bool>(player.currentMsgId, player.isPlaying),
+            builder: (_, data, __) => ChatVoiceBubble(
+                body, direction, (data.item1 == this.msgId) && data.item2),
+          );
+        });
         break;
       case EMMessageBodyType.VIDEO:
         bubble = ChatVideoBubble(body);

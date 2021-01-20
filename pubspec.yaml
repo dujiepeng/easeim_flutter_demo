@@ -64,6 +64,9 @@ dependencies:
   # 图片选择
   #file_picker: ^2.1.4
 
+  # 元组
+  tuple: ^1.0.3
+
   # 权限管理
   permission_handler: ^5.0.1+1
   
@@ -131,7 +134,10 @@ flutter:
     - images/chat_input_more_pin.png
 
     - images/chat_bubble_img_broken.png
-    - images/chat_bubble_voice_ripple.png
+    - images/chat_bubble_voice_ripple00.png
+    - images/chat_bubble_voice_ripple01.png
+    - images/chat_bubble_voice_ripple02.png
+    
     
     - images/contact_default_avatar.png
     

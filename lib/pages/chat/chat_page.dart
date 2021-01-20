@@ -1,13 +1,14 @@
 import 'dart:io';
 
 import 'package:easeim_flutter_demo/pages/chat/chat_input_bar.dart';
+import 'package:easeim_flutter_demo/unit/chat_voice_player.dart';
 import 'package:easeim_flutter_demo/widgets/common_widgets.dart';
-import 'package:easeim_flutter_demo/widgets/toast_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:im_flutter_sdk/im_flutter_sdk.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
+import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:record_amr/record_amr.dart';
 
@@ -36,6 +37,7 @@ class _ChatPageState extends State<ChatPage>
   int _adjacentTime = 0;
   bool _firstLoad = true;
   ChatInputBarType _inputBarType = ChatInputBarType.normal;
+  ChatVoicePlayer _voicePlayer = ChatVoicePlayer();
 
   int _subscribeId;
   bool _keyboardVisible = false;
@@ -121,20 +123,26 @@ class _ChatPageState extends State<ChatPage>
                     enablePullDown: true,
                     onRefresh: () => _loadMessages(moveBottom: _firstLoad),
                     controller: _refreshController,
-                    child: CustomScrollView(
-                      controller: _scorllController,
-                      slivers: [
-                        SliverList(
-                          delegate: SliverChildBuilderDelegate(
-                            (BuildContext context, int index) {
-                              return _chatItemFromMessage(
-                                  _msgList[index], index);
-                            },
-                            childCount: _msgList.length,
+                    child: Builder(builder: (context) {
+                      return CustomScrollView(
+                        controller: _scorllController,
+                        slivers: [
+                          SliverList(
+                            delegate: SliverChildBuilderDelegate(
+                              (BuildContext context, int index) {
+                                return ChangeNotifierProvider<
+                                    ChatVoicePlayer>.value(
+                                  value: _voicePlayer,
+                                  child: _chatItemFromMessage(
+                                      _msgList[index], index),
+                                );
+                              },
+                              childCount: _msgList.length,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
+                        ],
+                      );
+                    }),
                   ),
                 ),
               ),
@@ -287,7 +295,7 @@ class _ChatPageState extends State<ChatPage>
   }
 
   /// 点击bubble
-  _messageBubbleOnTap(EMMessage msg) {
+  _messageBubbleOnTap(EMMessage msg) async {
     switch (msg.body.type) {
       case EMMessageBodyType.TXT:
         break;
@@ -295,8 +303,11 @@ class _ChatPageState extends State<ChatPage>
         break;
       case EMMessageBodyType.VOICE:
         {
-          EMVoiceMessageBody body = (msg.body as EMVoiceMessageBody);
-          RecordAmr.play(body.localPath, (path) {});
+          if (_voicePlayer.currentMsgId == msg.msgId) {
+            _voicePlayer.stopPlay();
+          } else {
+            _voicePlayer.playVoice(msg);
+          }
         }
         break;
       case EMMessageBodyType.VIDEO:

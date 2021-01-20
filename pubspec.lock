@@ -317,6 +317,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "1.6.3"
+  quiver:
+    dependency: transitive
+    description:
+      name: quiver
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "2.1.5"
   rational:
     dependency: transitive
     description:
@@ -443,6 +450,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "1.0.0"
+  tuple:
+    dependency: "direct main"
+    description:
+      name: tuple
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "1.0.3"
   typed_data:
     dependency: transitive
     description:
