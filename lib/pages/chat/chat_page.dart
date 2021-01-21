@@ -12,6 +12,7 @@ import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:record_amr/record_amr.dart';
 
+import 'chat_face_view.dart';
 import 'chat_items/chat_item.dart';
 import 'chat_more_view.dart';
 
@@ -63,13 +64,11 @@ class _ChatPageState extends State<ChatPage>
       ChatMoreViewItem(
           'images/chat_input_more_camera.png', '相机', _moreCameraBtnOnTap),
       ChatMoreViewItem(
-          'images/chat_input_more_call.png', '音视频', _moreCallBtnOnTap),
-      ChatMoreViewItem(
           'images/chat_input_more_loc.png', '位置', _moreLocalBtnOnTap),
       ChatMoreViewItem(
           'images/chat_input_more_file.png', '文件', _moreFileBtnOnTap),
       ChatMoreViewItem(
-          'images/chat_input_more_pin.png', '群组回执', _morePinBtnOnTap),
+          'images/chat_input_more_pin.png', '自定义', _morePinBtnOnTap),
     ];
 
     // 添加环信回调监听
@@ -258,11 +257,7 @@ class _ChatPageState extends State<ChatPage>
 
   /// 表情View
   _faceWidget() {
-    return Container(
-      color: Colors.blue,
-      height: 100,
-      width: 100,
-    );
+    return ChatFaceView();
   }
 
   /// 下拉加载更多消息
@@ -386,19 +381,6 @@ class _ChatPageState extends State<ChatPage>
   /// 拍照按钮被点击
   _moreCameraBtnOnTap() {
     print('_moreCameraBtnOnTap');
-  }
-
-  /// 音视频按钮被点击
-  _moreCallBtnOnTap() async {
-    try {
-      await EMClient.getInstance.callManager
-          .makeCall(EMCallType.Voice, widget.conv.id);
-      Navigator.of(context).pushNamed('/voicecall');
-    } on EMError catch (e) {
-      print('call error ---${e.description}');
-    } on Error catch (e) {
-      print('flutter error -- $e');
-    }
   }
 
   /// 位置按钮被点击

@@ -141,6 +141,7 @@ flutter:
     
     - images/contact_default_avatar.png
     
+    - images/expression/
     
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
