@@ -41,7 +41,7 @@ class WeChatExpression extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       child: GridView.custom(
-        padding: EdgeInsets.only(left: 10, top: 10, right: 10, bottom: 40),
+        padding: EdgeInsets.only(left: 10, top: 10, right: 10, bottom: 60),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: this.crossAxisCount,
           mainAxisSpacing: this.mainAxisSpacing,

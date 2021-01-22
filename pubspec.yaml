@@ -121,6 +121,7 @@ flutter:
 
     - images/chat_input_bar_close.png
     - images/chat_input_bar_emoji.png
+    - images/chat_input_bar_keyboard.png
     - images/chat_input_bar_more_show.png
     - images/chat_input_bar_more_close.png
     - images/chat_input_bar_voice_hidden.png
@@ -138,6 +139,7 @@ flutter:
     - images/chat_bubble_voice_ripple01.png
     - images/chat_bubble_voice_ripple02.png
     
+    - images/chat_faces_delete.png
     
     - images/contact_default_avatar.png
     

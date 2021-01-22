@@ -242,22 +242,12 @@ class _ChatPageState extends State<ChatPage>
   /// 输入框下部分View
   _bottomWidget() {
     if (_inputBarType == ChatInputBarType.more) {
-      return _moreWidget();
+      return ChatMoreView(items);
     } else if (_inputBarType == ChatInputBarType.emoji) {
-      return _faceWidget();
+      return ChatFaceView(false);
     } else {
       return Container();
     }
-  }
-
-  /// 更多功能View
-  _moreWidget() {
-    return ChatMoreView(items);
-  }
-
-  /// 表情View
-  _faceWidget() {
-    return ChatFaceView();
   }
 
   /// 下拉加载更多消息

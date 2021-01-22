@@ -18,10 +18,12 @@ class ChatInputBar extends StatefulWidget {
   ChatInputBar({
     @required this.listener,
     this.barType = ChatInputBarType.normal,
+    this.textController,
   });
 
   final ChatInputBarType barType;
   final ChatInputBarListener listener;
+  final TextEditingController textController;
   @override
   State<StatefulWidget> createState() => _ChatInputBarState();
 }
@@ -35,11 +37,15 @@ class _ChatInputBarState extends State<ChatInputBar> {
   bool _voiceMoveIn = true;
 
   /// 输入框Controller
-  TextEditingController _textController = new TextEditingController();
+  TextEditingController _textController;
 
   @override
   void initState() {
     super.initState();
+    _textController = widget.textController;
+    if (_textController == null) {
+      _textController = TextEditingController();
+    }
     _inputFocusNode.addListener(() {
       // 获取焦点
       if (_inputFocusNode.hasFocus) {
@@ -131,7 +137,9 @@ class _ChatInputBarState extends State<ChatInputBar> {
               padding: EdgeInsets.zero,
               onPressed: () => _faceBtnOnTap(),
               child: Image.asset(
-                'images/chat_input_bar_emoji.png',
+                widget.barType == ChatInputBarType.emoji
+                    ? 'images/chat_input_bar_keyboard.png'
+                    : 'images/chat_input_bar_emoji.png',
               ),
             ),
           ),
