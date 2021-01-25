@@ -2,11 +2,24 @@ import 'package:easeim_flutter_demo/unit/wx_expression.dart';
 import 'package:easeim_flutter_demo/widgets/common_widgets.dart';
 import 'package:flutter/material.dart';
 
-class ChatFaceView extends StatelessWidget {
-  ChatFaceView(this.canDelete);
+typedef OnFaceTap = Function(Expression expression);
+typedef OnSendTap = void Function();
+typedef OnDeleteTap = void Function();
+
+class ChatFaceView extends StatefulWidget {
+  ChatFaceView(this.canDelete,
+      {this.onFaceTap, this.onSendTap, this.onDeleteTap});
 
   final bool canDelete;
+  final OnFaceTap onFaceTap;
+  final OnSendTap onSendTap;
+  final OnDeleteTap onDeleteTap;
 
+  @override
+  State<StatefulWidget> createState() => ChatFaceViewState();
+}
+
+class ChatFaceViewState extends State<ChatFaceView> {
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -18,7 +31,15 @@ class ChatFaceView extends StatelessWidget {
       height: sHeight(250),
       child: Stack(
         children: [
-          Positioned(child: WeChatExpression((Expression expression) {})),
+          Positioned(
+            child: WeChatExpression(
+              (Expression expression) {
+                if (widget.onFaceTap != null) {
+                  widget.onFaceTap(expression);
+                }
+              },
+            ),
+          ),
           Positioned(
             bottom: sHeight(20),
             right: sWidth(10),
@@ -50,16 +71,20 @@ class ChatFaceView extends StatelessWidget {
                       borderRadius: BorderRadius.circular(5),
                       color: Colors.white,
                     ),
+                    // 删除按钮
                     child: FlatButton(
                       child: Image.asset(
                         'images/chat_faces_delete.png',
-                        color: canDelete ? Colors.black87 : Colors.black26,
+                        color:
+                            widget.canDelete ? Colors.black87 : Colors.black26,
                         width: sWidth(25),
                         height: sWidth(20),
                         fit: BoxFit.fill,
                       ),
                       onPressed: () {
-                        print('发送');
+                        if (widget.onDeleteTap != null) {
+                          widget.onDeleteTap();
+                        }
                       },
                     ),
                   ),
@@ -71,19 +96,23 @@ class ChatFaceView extends StatelessWidget {
                     height: sWidth(45),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(5),
-                      color: canDelete
+                      color: widget.canDelete
                           ? Color.fromRGBO(26, 184, 77, 1)
                           : Colors.white,
                     ),
+                    // 发送按钮
                     child: FlatButton(
                       padding: EdgeInsets.zero,
                       onPressed: () {
-                        print('发送');
+                        if (widget.onSendTap != null) {
+                          widget.onSendTap();
+                        }
                       },
                       child: Text(
                         '发送',
                         style: TextStyle(
-                          color: canDelete ? Colors.white : Colors.black26,
+                          color:
+                              widget.canDelete ? Colors.white : Colors.black26,
                           fontSize: sFontSize(16),
                           fontWeight: FontWeight.w400,
                         ),

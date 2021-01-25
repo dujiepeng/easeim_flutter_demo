@@ -36,16 +36,10 @@ class _ChatInputBarState extends State<ChatInputBar> {
   bool _voiceBtnSelected = false;
   bool _voiceMoveIn = true;
 
-  /// 输入框Controller
-  TextEditingController _textController;
-
   @override
   void initState() {
     super.initState();
-    _textController = widget.textController;
-    if (_textController == null) {
-      _textController = TextEditingController();
-    }
+
     _inputFocusNode.addListener(() {
       // 获取焦点
       if (_inputFocusNode.hasFocus) {
@@ -57,7 +51,6 @@ class _ChatInputBarState extends State<ChatInputBar> {
   }
 
   void dispose() {
-    _textController.dispose();
     _inputFocusNode.dispose();
     super.dispose();
   }
@@ -98,6 +91,9 @@ class _ChatInputBarState extends State<ChatInputBar> {
                 _showVoiceBtn
                     ? 'images/chat_input_bar_voice_hidden.png'
                     : 'images/chat_input_bar_voice_show.png',
+                width: sWidth(22),
+                height: sWidth(22),
+                fit: BoxFit.fill,
               ),
             ),
           ),
@@ -140,6 +136,9 @@ class _ChatInputBarState extends State<ChatInputBar> {
                 widget.barType == ChatInputBarType.emoji
                     ? 'images/chat_input_bar_keyboard.png'
                     : 'images/chat_input_bar_emoji.png',
+                width: sWidth(22),
+                height: sWidth(22),
+                fit: BoxFit.fill,
               ),
             ),
           ),
@@ -163,6 +162,9 @@ class _ChatInputBarState extends State<ChatInputBar> {
                 widget.barType == ChatInputBarType.more
                     ? 'images/chat_input_bar_more_close.png'
                     : 'images/chat_input_bar_more_show.png',
+                width: sWidth(22),
+                height: sWidth(22),
+                fit: BoxFit.fill,
               ),
             ),
           ),
@@ -218,13 +220,16 @@ class _ChatInputBarState extends State<ChatInputBar> {
     return TextFormField(
       focusNode: _inputFocusNode,
       textInputAction: TextInputAction.send,
-      onEditingComplete: () {},
+      onChanged: (text) {},
+      // onEditingComplete: () {
+      //   print('onEditingComplete');
+      // },
       style: TextStyle(
         fontSize: sFontSize(14),
       ),
       maxLines: null,
       keyboardType: TextInputType.multiline,
-      controller: _textController,
+      controller: widget.textController,
       decoration: InputDecoration(
         isCollapsed: true,
         border: InputBorder.none,
@@ -331,7 +336,6 @@ class _ChatInputBarState extends State<ChatInputBar> {
 
   _sendBtnDidClicked(String txt) {
     if (widget.listener != null && txt.length > 0) {
-      _textController.text = '';
       widget.listener.sendBtnOnTap(txt);
     }
   }

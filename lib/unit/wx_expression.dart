@@ -256,6 +256,7 @@ class ExpressionText extends StatelessWidget {
                 children: _getContent(),
               ),
               maxLines: maxLine,
+              textAlign: TextAlign.left,
             )
           : Text.rich(TextSpan(
               children: _getContent(),
@@ -274,6 +275,7 @@ class ExpressionText extends StatelessWidget {
 
     //正则校验是否含有表情
     RegExp exp = new RegExp(r'\[.{1,4}?\]');
+
     if (exp.hasMatch(_text)) {
       var array = exp.allMatches(_text).toList();
       for (RegExpMatch r in array) {
@@ -300,10 +302,17 @@ class ExpressionText extends StatelessWidget {
         var expressionKV = ExpressionData.expressionKV[selectXy];
         stack.add(WidgetSpan(
           child: Image.asset(
-            'assets/expression/$expressionKV',
+            'images/expression/$expressionKV',
             width: 20.0,
             height: 20.0,
           ),
+        ));
+      }
+      var substring = _text.substring(afterX);
+      if (substring.length > 0) {
+        stack.add(TextSpan(
+          text: substring,
+          style: _textStyle,
         ));
       }
     } else {

@@ -198,7 +198,6 @@ class _LoginPageState extends State<LoginPage> {
 
   void showPrivacyStatement() {
     hiddenKeyboard();
-    // TODO: 显示隐私声明
   }
 
   loginAction() async {

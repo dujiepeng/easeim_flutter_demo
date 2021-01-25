@@ -1,3 +1,4 @@
+import 'package:easeim_flutter_demo/unit/wx_expression.dart';
 import 'package:easeim_flutter_demo/widgets/common_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:im_flutter_sdk/im_flutter_sdk.dart';
@@ -101,13 +102,13 @@ class _ConversationItemState extends State<ConversationItem> {
                     flex: 1,
                     child: Container(
                       padding: EdgeInsets.only(right: sWidth(10)),
-                      child: Text(
+                      child: ExpressionText(
                         _showInfo(),
-                        maxLines: 1,
-                        style: TextStyle(
+                        TextStyle(
                           color: Color.fromRGBO(153, 153, 153, 1),
                           fontSize: sFontSize(14),
                         ),
+                        maxLine: 1,
                       ),
                     ),
                   ),

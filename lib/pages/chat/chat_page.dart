@@ -39,7 +39,8 @@ class _ChatPageState extends State<ChatPage>
   bool _firstLoad = true;
   ChatInputBarType _inputBarType = ChatInputBarType.normal;
   ChatVoicePlayer _voicePlayer = ChatVoicePlayer();
-
+  ChatMoreView _moreView;
+  TextEditingController _inputBarEditingController = TextEditingController();
   int _subscribeId;
   bool _keyboardVisible = false;
 
@@ -53,10 +54,11 @@ class _ChatPageState extends State<ChatPage>
     _subscribeId = KeyboardVisibilityNotification().addNewListener(
       onChange: (bool visible) {
         _keyboardVisible = visible;
-        print(visible);
         _setStateAndMoreToListViewEnd();
       },
     );
+
+    _inputBarEditingController.addListener(() {});
 
     items = [
       ChatMoreViewItem(
@@ -71,6 +73,7 @@ class _ChatPageState extends State<ChatPage>
           'images/chat_input_more_pin.png', '自定义', _morePinBtnOnTap),
     ];
 
+    _moreView = ChatMoreView(items);
     // 添加环信回调监听
     EMClient.getInstance.chatManager.addListener(this);
     // 设置所有消息已读
@@ -83,6 +86,7 @@ class _ChatPageState extends State<ChatPage>
     // 移除环信回调监听
     EMClient.getInstance.chatManager.removeListener(this);
     _scorllController.dispose();
+    _inputBarEditingController.dispose();
     super.dispose();
   }
 
@@ -91,6 +95,7 @@ class _ChatPageState extends State<ChatPage>
     _inputBar = ChatInputBar(
       listener: this,
       barType: _inputBarType,
+      textController: _inputBarEditingController,
     );
 
     return Scaffold(
@@ -242,9 +247,23 @@ class _ChatPageState extends State<ChatPage>
   /// 输入框下部分View
   _bottomWidget() {
     if (_inputBarType == ChatInputBarType.more) {
-      return ChatMoreView(items);
+      return _moreView;
     } else if (_inputBarType == ChatInputBarType.emoji) {
-      return ChatFaceView(false);
+      return ChatFaceView(
+        _inputBarEditingController.text.length > 0,
+        onFaceTap: (expression) {
+          _inputBarEditingController.text =
+              _inputBarEditingController.text + '[${expression.name}]';
+          setState(() {});
+        },
+        onDeleteTap: () {
+          if (_inputBarEditingController.text.length > 0) {
+            _inputBarEditingController.text = _inputBarEditingController.text
+                .substring(0, _inputBarEditingController.text.length - 1);
+          }
+        },
+        onSendTap: () => _sendTextMessage(_inputBarEditingController.text),
+      );
     } else {
       return Container();
     }
@@ -321,11 +340,13 @@ class _ChatPageState extends State<ChatPage>
 
   /// 发送文字消息
   _sendTextMessage(String txt) {
+    if (txt.length == 0) return;
     EMMessage msg = EMMessage.createTxtSendMessage(
       username: widget.conv.id,
       content: txt,
     );
     _sendMessage(msg);
+    _inputBarEditingController.text = '';
   }
 
   /// 发送图片消息
@@ -381,12 +402,6 @@ class _ChatPageState extends State<ChatPage>
   /// 文件按钮被点击
   _moreFileBtnOnTap() async {
     print('_moreFileBtnOnTap');
-    EMCursorResult cursorResult =
-        await EMClient.getInstance.groupManager.getPublicGroupsFromServer();
-
-    for (var group in cursorResult.data) {
-      print('group ---${(group)}');
-    }
   }
 
   /// 大头针按钮被点击
